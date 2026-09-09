@@ -119,3 +119,4 @@ app.get('/api/admin/metrics', authenticateToken, requireAdmin, (req, res) => {
 app.listen(PORT, () => {
     console.log(`Backend API Database berjalan di http://localhost:${PORT}`);
 });
+module.exports = app;
