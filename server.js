@@ -10,6 +10,11 @@ app.use(cors());
 app.use(express.json());
 
 const PORT = process.env.PORT || 3000;
+if (process.env.NODE_ENV !== 'production') {
+    app.listen(PORT, () => {
+        console.log(`Server berjalan di http://localhost:${PORT}`);
+    });
+}
 const SECRET_KEY = process.env.JWT_SECRET || 'KUNCI_RAHASIA_SUPER_AMAN_UNTUK_PWA_ANDA';
 
 // Di Vercel Serverless, gunakan folder sementara /tmp untuk membaca/menulis file sqlite
@@ -150,6 +155,13 @@ app.get('/api/admin/metrics', authenticateToken, requireAdmin, (req, res) => {
             activeApps: 3,
             status: 'Server Database Sinkron & Aman'
         });
+    });
+});
+
+app.get('/api/profile', authenticateToken, (req, res) => {
+    db.get(`SELECT id, fullName, email, role, createdAt FROM users WHERE id = ?`, [req.user.id], (err, row) => {
+        if (err || !row) return res.status(404).json({ message: 'Data pengguna tidak ditemukan.' });
+        res.json(row);
     });
 });
 
