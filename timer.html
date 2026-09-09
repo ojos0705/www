@@ -1,0 +1,102 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Timer Proofing | Ekosistem PWA</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: { extend: { colors: { brand: '#0ea5e9', dark: '#0f172a' } } }
+        }
+    </script>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm fixed w-full z-50 top-0 h-16 flex items-center">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between w-full items-center">
+            <a href="index.html" class="font-extrabold text-xl text-blue-600 flex items-center gap-2">
+                <i class="fa-solid fa-arrow-left"></i> Kembali ke Beranda
+            </a>
+            <span class="bg-blue-100 text-blue-700 px-3 py-1 rounded-full text-sm font-bold" id="userBadge">Memeriksa Sesi...</span>
+        </div>
+    </nav>
+
+    <!-- Konten Utama -->
+    <main class="flex-grow pt-24 pb-16 max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 w-full">
+        <div class="bg-gradient-to-r from-blue-600 to-sky-500 rounded-3xl p-8 md:p-12 text-white shadow-xl mb-12 flex flex-col md:flex-row items-center justify-between">
+            <div class="mb-6 md:mb-0 max-w-xl">
+                <span class="bg-blue-700 bg-opacity-50 text-blue-100 px-3 py-1 rounded-md text-xs font-bold uppercase tracking-wider">Modul Produksi</span>
+                <h1 class="text-3xl md:text-5xl font-extrabold mt-3 mb-4">Timer Proofing Presisi Tinggi</h1>
+                <p class="text-blue-100 text-base md:text-lg">Pantau metrik adonan, kalibrasi suhu fermentasi secara real-time, dan jaga konsistensi kualitas adonan Anda.</p>
+            </div>
+            <div class="text-6xl md:text-8xl bg-white bg-opacity-10 p-6 rounded-2xl backdrop-blur-sm">
+                ⏱️
+            </div>
+        </div>
+
+        <!-- HANYA UNTUK TES DEVELOPER -->
+        <div class="flex flex-wrap justify-center gap-4">
+            <!-- Unduh APK Android Internal -->
+            <a href="./downloads/timer-proofing-android-v1.0.apk" download class="bg-black text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition shadow">
+                <i class="fa-brands fa-google-play text-xl"></i>
+                <div class="text-left"><p class="text-[10px]">UNDUH INTERNAL</p><p class="font-bold text-sm">Android APK</p></div>
+            </a>
+
+            <!-- Tautan Distribusi Internal Apple / TestFlight -->
+            <a href="https://testflight.apple.com/join/kode-undangan-anda" target="_blank" class="bg-black text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition shadow">
+                <i class="fa-brands fa-apple text-2xl"></i>
+                <div class="text-left"><p class="text-[10px]">DISTRIBUSI</p><p class="font-bold text-sm">Apple TestFlight</p></div>
+            </a>
+
+            <!-- Unduh File Arsip/PWA Lainnya -->
+            <a href="./downloads/timer-proofing-package.zip" download class="bg-[#1428a0] text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-blue-900 transition shadow">
+                <i class="fa-solid fa-box-archive text-xl"></i>
+                <div class="text-left"><p class="text-[10px]">ARSIP LOKAL</p><p class="font-bold text-sm">Paket ZIP PWA</p></div>
+            </a>
+        </div>
+        <!-- AKHIR HANYA UNTUK TES DEVELOPER -->
+
+        <!-- Download Multi-Platform -->
+        <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-8 text-center">
+            <h2 class="text-2xl font-bold mb-3">Unduh Aplikasi Timer Proofing</h2>
+            <p class="text-gray-500 mb-8 max-w-md mx-auto">Sinkronkan stopwatch produksi Anda langsung ke perangkat seluler pilihan Anda.</p>
+            <div class="flex flex-wrap justify-center gap-4">
+                <a href="#" class="bg-black text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition shadow">
+                    <i class="fa-brands fa-google-play text-xl"></i>
+                    <div class="text-left"><p class="text-[10px]">GET IT ON</p><p class="font-bold text-sm">Google Play</p></div>
+                </a>
+                <a href="#" class="bg-black text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition shadow">
+                    <i class="fa-brands fa-apple text-2xl"></i>
+                    <div class="text-left"><p class="text-[10px]">Download on the</p><p class="font-bold text-sm">App Store</p></div>
+                </a>
+                <a href="#" class="bg-[#1428a0] text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-blue-900 transition shadow">
+                    <i class="fa-solid fa-bag-shopping text-xl"></i>
+                    <div class="text-left"><p class="text-[10px]">Available on</p><p class="font-bold text-sm">Galaxy Store</p></div>
+                </a>
+                <a href="#" class="bg-[#ce0000] text-white px-6 py-3 rounded-xl flex items-center gap-3 hover:bg-red-800 transition shadow">
+                    <i class="fa-brands fa-huawei text-xl"></i>
+                    <div class="text-left"><p class="text-[10px]">Explore it on</p><p class="font-bold text-sm">AppGallery</p></div>
+                </a>
+            </div>
+        </div>
+    </main>
+
+    <!-- Script Proteksi Sesi SSO -->
+    <script>
+        document.addEventListener("DOMContentLoaded", () => {
+            const token = localStorage.getItem('sso_token');
+            const name = localStorage.getItem('sso_name') || 'Pengguna';
+            
+            if (!token) {
+                alert("Sesi Anda belum terotentikasi. Silakan login terlebih dahulu.");
+                window.location.href = "index.html";
+            } else {
+                document.getElementById('userBadge').innerText = `Aktif: ${name}`;
+            }
+        });
+    </script>
+</body>
+</html>

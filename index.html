@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AppEcosystem | Integrasi PWA & Mobile</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: { 
+                    colors: { 
+                        brand: '#0ea5e9', 
+                        dark: '#0f172a',
+                        card: '#1e293b'
+                    } 
+                }
+            }
+        }
+    </script>
+    <style>
+        /* Smooth scrolling dan transisi dasar */
+        html { scroll-behavior: smooth; }
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+    </style>
+</head>
+<body class="bg-gray-50 text-gray-800 font-sans antialiased min-h-screen flex flex-col">
+
+    <!-- Navbar -->
+    <nav class="bg-white shadow-sm fixed w-full z-50 top-0 h-16 flex items-center transition-all duration-300">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex justify-between w-full items-center">
+            <div class="font-extrabold text-2xl text-brand flex items-center gap-2 cursor-pointer" onclick="showView('homeView')">
+                <i class="fa-solid fa-layer-group"></i> AppEcosystem
+            </div>
+            <!-- Auth Menu Dinamis -->
+            <div class="flex items-center space-x-4" id="authMenu">
+                <!-- Diisi oleh JavaScript -->
+            </div>
+
+            <!-- Modal Edit Profil -->
+            <div id="profileModal" class="fixed inset-0 bg-dark bg-opacity-75 hidden flex justify-center items-center z-[100] backdrop-blur-sm">
+                <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+                    <div class="flex justify-between items-center mb-6">
+                        <h2 class="text-2xl font-extrabold text-dark">Ubah Profil Pengguna</h2>
+                        <button onclick="toggleModal('profileModal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+                    </div>
+                    <form id="profileForm" onsubmit="handleUpdateProfile(event)">
+                        <div class="mb-4">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                            <input type="text" id="profileName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition" required>
+                        </div>
+                        <div class="mb-6">
+                            <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi Baru <span class="text-xs text-gray-400">(Opsional)</span></label>
+                            <input type="password" id="profilePassword" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengubah" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition">
+                        </div>
+                        <button type="submit" class="w-full bg-brand text-white py-3 rounded-lg font-bold hover:bg-sky-600 transition shadow-lg">Simpan Perubahan</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </nav>
+
+    <!-- Main Content Area -->
+    <main class="flex-grow pt-16">
+        
+        <!-- ========================================== -->
+        <!-- VIEW 1: LANDING PAGE (Terlihat secara default) -->
+        <!-- ========================================== -->
+        <div id="homeView" class="fade-in block">
+            <!-- Hero Section -->
+            <header class="pt-24 pb-20 text-center bg-dark text-white relative overflow-hidden">
+                <div class="absolute inset-0 bg-gradient-to-r from-blue-900 to-dark opacity-50"></div>
+                <div class="max-w-4xl mx-auto px-4 relative z-10">
+                    <h1 class="text-4xl md:text-6xl font-extrabold mb-6 leading-tight">Satu Akun untuk Semua<br><span class="text-brand">Solusi Bisnis Anda</span></h1>
+                    <p class="text-lg md:text-xl text-gray-300 mb-10 max-w-2xl mx-auto">Kelola metrik produksi, pantau lokasi armada, dan seimbangkan pembukuan akuntansi Anda dalam satu ekosistem PWA terpadu.</p>
+                    <button onclick="toggleModal('registerModal')" class="bg-brand text-white px-8 py-4 rounded-full font-bold text-lg hover:bg-sky-600 transition shadow-[0_0_15px_rgba(14,165,233,0.5)]">Daftar Sekarang &mdash; Gratis</button>
+                </div>
+            </header>
+
+            <!-- Produk Section -->
+            <section class="py-20 max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+                <div class="text-center mb-16">
+                    <h2 class="text-3xl font-bold text-dark">Rangkaian PWA & Mobile App</h2>
+                    <div class="w-24 h-1 bg-brand mx-auto mt-4 rounded"></div>
+                </div>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Timer Proofing -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 bg-blue-100 text-blue-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-stopwatch"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Timer Proofing</h3>
+                        <p class="text-gray-500 mb-6 flex-grow">Pantau presisi metrik adonan, kalibrasi suhu, dan pastikan kualitas pengembangan produk secara real-time.</p>
+                        <button onclick="requireLogin('Timer Proofing', 'timer.html')" class="text-brand font-bold hover:text-blue-800 flex items-center gap-2">Buka Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <!-- Mobile Tracking -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 bg-green-100 text-green-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-map-location-dot"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Mobile Tracking</h3>
+                        <p class="text-gray-500 mb-6 flex-grow">Integrasi GPS native untuk pelacakan armada dinamis tanpa hardware tambahan. Hemat dan efisien.</p>
+                        <button onclick="requireLogin('Mobile Tracking', 'tracking.html')" class="text-green-600 font-bold hover:text-green-800 flex items-center gap-2">Buka Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <!-- Akuntansi SIAPIK -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 bg-purple-100 text-purple-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-calculator"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Akuntansi SIAPIK</h3>
+                        <p class="text-gray-500 mb-6 flex-grow">Pencatatan transaksi multi-line, jurnal otomatis, dan ekspor laporan keuangan terstandarisasi ke PDF.</p>
+                        <button onclick="requireLogin('Akuntansi SIAPIK', 'siapik.html')" class="text-purple-600 font-bold hover:text-purple-800 flex items-center gap-2">Buka Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <!-- KUHP App -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 bg-amber-100 text-amber-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-scale-balanced"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">KUHP App</h3>
+                        <p class="text-gray-500 mb-6 flex-grow">Akses cepat referensi Kitab Undang-Undang Hukum Pidana, pasal, dan penjelasannya secara digital.</p>
+                        <button onclick="requireLogin('KUHP App', 'kuhp.html')" class="text-amber-600 font-bold hover:text-amber-800 flex items-center gap-2">Buka Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+
+                    <!-- Kumpulan Tes ASN/PPPK -->
+                    <div class="bg-white p-8 rounded-2xl shadow-lg border border-gray-100 hover:shadow-xl transition flex flex-col items-center text-center group">
+                        <div class="w-16 h-16 bg-rose-100 text-rose-600 rounded-2xl flex items-center justify-center text-3xl mb-6 group-hover:scale-110 transition">
+                            <i class="fa-solid fa-book-open-reader"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold mb-3">Tes ASN / PPPK</h3>
+                        <p class="text-gray-500 mb-6 flex-grow">Simulasi latihan CAT, bank soal TWK, TIU, TKP, serta materi kompetensi teknis PPPK terupdate.</p>
+                        <button onclick="requireLogin('Tes ASN / PPPK', 'asn.html')" class="text-rose-600 font-bold hover:text-rose-800 flex items-center gap-2">Buka Aplikasi <i class="fa-solid fa-arrow-right"></i></button>
+                    </div>
+                </div>
+            </section>
+
+            <!-- Download App Stores -->
+            <section class="bg-gray-100 py-16 text-center border-t border-gray-200">
+                <h2 class="text-2xl font-bold mb-10">Tersedia Native di Semua Platform</h2>
+                <div class="flex flex-wrap justify-center gap-4 px-4 max-w-4xl mx-auto">
+                    <a href="#" class="bg-black text-white px-6 py-4 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition min-w-[200px] justify-center shadow-md">
+                        <i class="fa-brands fa-google-play text-2xl"></i>
+                        <div class="text-left"><p class="text-xs">GET IT ON</p><p class="font-bold">Google Play</p></div>
+                    </a>
+                    <a href="#" class="bg-black text-white px-6 py-4 rounded-xl flex items-center gap-3 hover:bg-gray-800 transition min-w-[200px] justify-center shadow-md">
+                        <i class="fa-brands fa-apple text-3xl"></i>
+                        <div class="text-left"><p class="text-xs">Download on the</p><p class="font-bold">App Store</p></div>
+                    </a>
+                    <a href="#" class="bg-[#1428a0] text-white px-6 py-4 rounded-xl flex items-center gap-3 hover:bg-blue-900 transition min-w-[200px] justify-center shadow-md">
+                        <i class="fa-solid fa-bag-shopping text-2xl"></i>
+                        <div class="text-left"><p class="text-xs">Available on</p><p class="font-bold">Galaxy Store</p></div>
+                    </a>
+                    <a href="#" class="bg-[#ce0000] text-white px-6 py-4 rounded-xl flex items-center gap-3 hover:bg-red-800 transition min-w-[200px] justify-center shadow-md">
+                        <i class="fa-brands fa-huawei text-2xl"></i>
+                        <div class="text-left"><p class="text-xs">Explore it on</p><p class="font-bold">AppGallery</p></div>
+                    </a>
+                </div>
+            </section>
+        </div>
+
+
+        <!-- ========================================== -->
+        <!-- VIEW 2: ADMIN DASHBOARD (Tersembunyi)      -->
+        <!-- ========================================== -->
+        <div id="adminView" class="hidden fade-in bg-gray-100 min-h-[calc(100vh-4rem)] p-6 md:p-10">
+            <div class="max-w-7xl mx-auto">
+                <div class="flex justify-between items-end mb-8">
+                    <div>
+                        <h1 class="text-3xl font-bold text-dark">Dashboard Metrik</h1>
+                        <p class="text-gray-500 mt-1">Pemantauan data transaksi ekosistem PWA secara real-time</p>
+                    </div>
+                    <button onclick="fetchAdminMetrics()" class="bg-white border border-gray-300 px-4 py-2 rounded-lg text-sm font-medium hover:bg-gray-50 flex items-center gap-2">
+                        <i class="fa-solid fa-rotate-right"></i> Refresh
+                    </button>
+                </div>
+
+                <!-- Alert Loading/Error -->
+                <div id="dashboardAlert" class="mb-6 hidden px-4 py-3 rounded-lg text-sm font-medium"></div>
+
+                <!-- Kartu Metrik -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 border-l-4 border-l-brand">
+                        <p class="text-gray-500 text-sm font-medium mb-1">Total Pengguna Terdaftar</p>
+                        <h3 class="text-3xl font-bold text-dark" id="metricUsers">--</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 border-l-4 border-l-purple-500">
+                        <p class="text-gray-500 text-sm font-medium mb-1">Total Transaksi SIAPIK</p>
+                        <h3 class="text-3xl font-bold text-dark" id="metricTransactions">--</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 border-l-4 border-l-green-500">
+                        <p class="text-gray-500 text-sm font-medium mb-1">PWA Aktif Terhubung</p>
+                        <h3 class="text-3xl font-bold text-dark" id="metricPwas">--</h3>
+                    </div>
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 border-l-4 border-l-orange-500">
+                        <p class="text-gray-500 text-sm font-medium mb-1">Status Server</p>
+                        <h3 class="text-xl font-bold text-green-600 mt-2" id="metricStatus">--</h3>
+                        <p class="text-xs text-gray-400 mt-1" id="metricUpdate">Last update: --</p>
+                    </div>
+                </div>
+
+                <!-- Grafik Dummy / Tabel Terbaru -->
+                <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
+                    <h3 class="text-lg font-bold mb-4">Log Transaksi Terbaru (Simulasi)</h3>
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full text-left text-sm whitespace-nowrap">
+                            <thead class="uppercase tracking-wider border-b-2 border-gray-200 text-gray-500">
+                                <tr>
+                                    <th scope="col" class="px-6 py-4">ID TRX</th>
+                                    <th scope="col" class="px-6 py-4">Aplikasi Sumber</th>
+                                    <th scope="col" class="px-6 py-4">Aktivitas</th>
+                                    <th scope="col" class="px-6 py-4">Status</th>
+                                </tr>
+                            </thead>
+                            <tbody class="border-b border-gray-200 text-gray-700">
+                                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                    <td class="px-6 py-4 font-mono text-xs">TRX-9821</td>
+                                    <td class="px-6 py-4"><span class="bg-purple-100 text-purple-700 px-2 py-1 rounded text-xs font-bold">SIAPIK</span></td>
+                                    <td class="px-6 py-4">Jurnal Umum - Kas Masuk</td>
+                                    <td class="px-6 py-4 text-green-600 font-medium"><i class="fa-solid fa-check-circle"></i> Selesai</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50 border-b border-gray-100">
+                                    <td class="px-6 py-4 font-mono text-xs">TRX-9820</td>
+                                    <td class="px-6 py-4"><span class="bg-blue-100 text-blue-700 px-2 py-1 rounded text-xs font-bold">Timer</span></td>
+                                    <td class="px-6 py-4">Kalibrasi Suhu Adonan #4</td>
+                                    <td class="px-6 py-4 text-green-600 font-medium"><i class="fa-solid fa-check-circle"></i> Selesai</td>
+                                </tr>
+                                <tr class="hover:bg-gray-50">
+                                    <td class="px-6 py-4 font-mono text-xs">TRX-9819</td>
+                                    <td class="px-6 py-4"><span class="bg-green-100 text-green-700 px-2 py-1 rounded text-xs font-bold">Tracking</span></td>
+                                    <td class="px-6 py-4">Update Koordinat Kurir</td>
+                                    <td class="px-6 py-4 text-amber-500 font-medium"><i class="fa-solid fa-spinner fa-spin"></i> Sinkronisasi</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- ========================================== -->
+        <!-- VIEW 3: USER PROFILE (Tersembunyi)         -->
+        <!-- ========================================== -->
+        <div id="profileView" class="hidden fade-in bg-gray-50 min-h-[calc(100vh-4rem)] p-6 md:p-10">
+            <div class="max-w-4xl mx-auto">
+                <div class="mb-8">
+                    <h1 class="text-3xl font-bold text-dark">Pengaturan Akun & Profil</h1>
+                    <p class="text-gray-500 mt-1">Kelola identitas pribadi dan kredensial keamanan akun Anda.</p>
+                </div>
+
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-8">
+                    <!-- Kartu Info Singkat -->
+                    <div class="bg-white p-6 rounded-2xl shadow-sm border border-gray-200 text-center h-fit">
+                        <div class="w-20 h-20 bg-sky-100 text-brand rounded-full flex items-center justify-center text-3xl mx-auto mb-4 font-bold" id="profileAvatar">
+                            --
+                        </div>
+                        <h3 class="text-xl font-bold text-dark" id="displayFullName">Memuat...</h3>
+                        <p class="text-sm text-gray-500 mt-1" id="displayEmail">--</p>
+                        <div class="mt-4 pt-4 border-t border-gray-100 flex justify-center">
+                            <span class="bg-blue-50 text-brand text-xs px-3 py-1 rounded-full font-bold uppercase tracking-wider" id="displayRole">--</span>
+                        </div>
+                    </div>
+
+                    <!-- Form Edit Profil -->
+                    <div class="md:col-span-2 bg-white p-8 rounded-2xl shadow-sm border border-gray-200">
+                        <h3 class="text-xl font-bold text-dark mb-6 flex items-center gap-2">
+                            <i class="fa-solid fa-user-pen text-brand"></i> Perbarui Informasi Profil
+                        </h3>
+
+                        <form id="formUpdateProfile" onsubmit="handleUpdateProfile(event)">
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                                <input type="text" id="inputFullName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition" required>
+                            </div>
+
+                            <div class="mb-5">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Email <span class="text-xs text-gray-400">(Tidak dapat diubah)</span></label>
+                                <input type="email" id="inputEmail" class="w-full px-4 py-3 bg-gray-100 border border-gray-200 rounded-lg text-gray-500 cursor-not-allowed outline-none" disabled>
+                            </div>
+
+                            <div class="mb-6 pt-4 border-t border-gray-100">
+                                <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi Baru <span class="text-xs text-gray-400">(Opsional)</span></label>
+                                <input type="password" id="inputPassword" autocomplete="new-password" placeholder="Kosongkan jika tidak ingin mengganti sandi" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition">
+                            </div>
+
+                            <div class="flex items-center justify-between">
+                                <button type="submit" class="bg-brand text-white px-6 py-3 rounded-lg font-bold hover:bg-sky-600 transition shadow-md">Simpan Perubahan</button>
+                                <span id="updateStatusText" class="text-sm font-medium text-green-600 hidden"><i class="fa-solid fa-check-circle"></i> Berhasil disimpan!</span>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <!-- Modal Registrasi -->
+    <div id="registerModal" class="fixed inset-0 bg-dark bg-opacity-75 hidden flex justify-center items-center z-[100] backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold text-dark">Buat Akun SSO</h2>
+                <button onclick="toggleModal('registerModal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="registerForm" onsubmit="handleRegister(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Nama Lengkap</label>
+                    <input type="text" id="regName" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition" required>
+                </div>
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
+                    <input type="email" id="regEmail" autocomplete="email" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-brand focus:border-brand outline-none transition" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
+                    <input type="password" id="regPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
+                </div>
+                <button type="submit" class="w-full bg-brand text-white py-3 rounded-lg font-bold hover:bg-sky-600 transition shadow-lg">Daftar Sekarang</button>
+                <p class="mt-4 text-center text-sm text-gray-600">Sudah punya akun? <a href="#" onclick="toggleModal('registerModal'); toggleModal('loginModal')" class="text-brand font-bold hover:underline">Login di sini</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Modal Login -->
+    <div id="loginModal" class="fixed inset-0 bg-dark bg-opacity-75 hidden flex justify-center items-center z-[100] backdrop-blur-sm">
+        <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
+            <div class="flex justify-between items-center mb-6">
+                <h2 class="text-2xl font-extrabold text-dark">Login Ekosistem</h2>
+                <button onclick="toggleModal('loginModal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <form id="loginForm" onsubmit="handleLogin(event)">
+                <div class="mb-4">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
+                    <input type="email" id="logEmail" autocomplete="username" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
+                </div>
+                <div class="mb-6">
+                    <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
+                    <input type="password" id="logPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
+                </div>
+                <button type="submit" class="w-full bg-dark text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition shadow-lg">Masuk (Login)</button>
+                <p class="mt-4 text-center text-sm text-gray-600">Belum punya akun? <a href="#" onclick="toggleModal('loginModal'); toggleModal('registerModal')" class="text-brand font-bold hover:underline">Daftar gratis</a></p>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script Logika Frontend -->
+    <script>
+        const API_URL = window.location.hostname === 'localhost' 
+        ? 'http://localhost:3000/api' 
+        : '/api';
+
+        // Manajemen UI
+        function toggleModal(modalID) {
+            const modal = document.getElementById(modalID);
+            if (modal.classList.contains('hidden')) {
+                modal.classList.remove('hidden');
+            } else {
+                modal.classList.add('hidden');
+            }
+        }
+
+        function showView(viewName) {
+            // Sembunyikan semua view utama
+            document.getElementById('homeView').classList.add('hidden');
+            document.getElementById('adminView').classList.add('hidden');
+            
+            // Pastikan elemen profileView ada sebelum memodifikasinya
+            const profileView = document.getElementById('profileView');
+            if(profileView) profileView.classList.add('hidden');
+
+            // Tampilkan view yang dipilih
+            document.getElementById(viewName).classList.remove('hidden');
+
+            if(viewName === 'adminView') {
+                fetchAdminMetrics();
+            } else if(viewName === 'profileView') {
+                fetchUserProfileInternal();
+            }
+        }
+
+        function requireLogin(appName, targetUrl) {
+            const token = localStorage.getItem('sso_token');
+            if(!token) {
+                alert(`Silakan login terlebih dahulu untuk mengakses ${appName}.`);
+                toggleModal('loginModal');
+            } else {
+                // Karena PWA berada di domain yang sama (localhost), token di localStorage otomatis terbaca oleh PWA.
+                // Kita hanya perlu mengarahkan user ke direktori PWA tersebut.
+                console.log(`Mengalihkan ke ${appName}...`);
+                window.location.href = targetUrl; 
+            }
+        }
+
+        // Render Navbar Berdasarkan Status Login
+        function renderNavbar() {
+            const token = localStorage.getItem('sso_token');
+            const name = localStorage.getItem('sso_name') || 'User';
+            const authMenu = document.getElementById('authMenu');
+
+            if (token) {
+                // User Logged In
+                authMenu.innerHTML = `
+                    <div class="hidden md:flex items-center text-sm mr-2 text-gray-600 cursor-pointer hover:text-brand" onclick="openProfileModal()" title="Klik untuk edit profil">
+                        <i class="fa-solid fa-user-circle text-xl mr-2 text-brand"></i> <span id="navUserName">${name}</span>
+                    </div>
+                    <button onclick="showView('profileView')" class="bg-gray-100 text-gray-700 px-3 py-2 rounded-lg font-medium hover:bg-gray-200 transition text-sm flex items-center gap-1.5" title="Buka Pengaturan Profil">
+                        <i class="fa-solid fa-user-gear"></i> <span class="hidden sm:inline">Profil</span>
+                    </button>
+                    <button onclick="showView('adminView')" class="bg-dark text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition text-sm flex items-center gap-2">
+                        <i class="fa-solid fa-chart-pie"></i> Dashboard
+                    </button>
+                    <button onclick="handleLogout()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg font-medium hover:bg-red-600 hover:text-white transition text-sm">
+                        Logout
+                    </button>
+                `;
+            } else {
+                // Not Logged In
+                authMenu.innerHTML = `
+                    <button onclick="toggleModal('loginModal')" class="text-gray-700 hover:text-brand font-bold px-3 py-2">Login</button>
+                    <button onclick="toggleModal('registerModal')" class="bg-brand text-white px-5 py-2.5 rounded-lg font-bold hover:bg-sky-600 transition shadow-md">Buat Akun</button>
+                `;
+            }
+        }
+
+        // Interaksi API Backend
+        async function handleRegister(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('regName').value;
+            const email = document.getElementById('regEmail').value;
+            const password = document.getElementById('regPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/register`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ fullName, email, password })
+                });
+                const data = await response.json();
+                
+                if(response.ok) {
+                    alert('Registrasi Berhasil! Data Anda telah masuk database. Silakan Login.');
+                    document.getElementById('registerForm').reset();
+                    toggleModal('registerModal');
+                    toggleModal('loginModal');
+                } else {
+                    alert("Gagal: " + data.message);
+                }
+            } catch (err) {
+                alert('Gagal terhubung ke server. Pastikan node server.js berjalan.');
+            }
+        }
+
+        async function handleLogin(e) {
+            e.preventDefault();
+            const email = document.getElementById('logEmail').value;
+            const password = document.getElementById('logPassword').value;
+
+            try {
+                const response = await fetch(`${API_URL}/login`, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ email, password })
+                });
+                const data = await response.json();
+
+                if(response.ok) {
+                    localStorage.setItem('sso_token', data.token);
+                    localStorage.setItem('sso_name', data.name);
+                    localStorage.setItem('sso_role', data.role);
+                    
+                    document.getElementById('loginForm').reset();
+                    toggleModal('loginModal');
+                    renderNavbar();
+                    
+                    // 2. Arahkan pengguna berdasarkan Hak Akses (Role)
+                    if (data.role === 'admin') {
+                        showView('adminView'); // Buka dashboard untuk admin
+                    } else {
+                        showView('homeView'); // Tetap di halaman utama untuk user biasa
+                        alert("Login berhasil! Silakan klik 'Buka Aplikasi' pada layanan PWA yang Anda butuhkan.");
+                    }
+                } else {
+                    alert("Gagal: " + data.message);
+                }
+            } catch (err) {
+                alert('Gagal terhubung ke server. Pastikan node server.js berjalan.');
+            }
+        }
+
+        function handleLogout() {
+            localStorage.removeItem('sso_token');
+            localStorage.removeItem('sso_name');
+            renderNavbar();
+            showView('homeView');
+        }
+
+        async function fetchAdminMetrics() {
+            const token = localStorage.getItem('sso_token');
+            const alertBox = document.getElementById('dashboardAlert');
+            
+            if(!token) return;
+
+            try {
+                // Tampilkan loading state
+                document.getElementById('metricUsers').innerText = '...';
+                document.getElementById('metricTransactions').innerText = '...';
+                
+                const response = await fetch(`${API_URL}/admin/metrics`, {
+                    method: 'GET',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    }
+                });
+                
+                const data = await response.json();
+
+                if(response.ok) {
+                    alertBox.classList.add('hidden');
+                    // Render data dari Database ke UI
+                    document.getElementById('metricUsers').innerText = data.totalUsers.toLocaleString('id-ID');
+                    document.getElementById('metricTransactions').innerText = data.totalTransactions.toLocaleString('id-ID');
+                    document.getElementById('metricPwas').innerText = data.activePwas;
+                    document.getElementById('metricStatus').innerText = data.serverStatus;
+                    document.getElementById('metricUpdate').innerText = `Last update: ${data.lastUpdate}`;
+                } else {
+                    // Tangani token kedaluwarsa atau akses ditolak
+                    alertBox.className = "mb-6 px-4 py-3 rounded-lg text-sm font-medium bg-red-100 text-red-700 block";
+                    alertBox.innerText = `Akses ditolak: ${data.message}. Silakan relogin.`;
+                    if(response.status === 401 || response.status === 403) handleLogout();
+                }
+            } catch (err) {
+                alertBox.className = "mb-6 px-4 py-3 rounded-lg text-sm font-medium bg-red-100 text-red-700 block";
+                alertBox.innerText = "Error: Tidak dapat menghubungi Database Server.";
+            }
+        }
+
+        async function fetchUserProfileInternal() {
+            const token = localStorage.getItem('sso_token');
+            if (!token) return;
+
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    headers: { 'Authorization': `Bearer ${token}` }
+                });
+                
+                if (response.ok) {
+                    const user = await response.json();
+                    
+                    // Render data ke elemen profil internal
+                    document.getElementById('displayFullName').innerText = user.fullName;
+                    document.getElementById('displayEmail').innerText = user.email;
+                    document.getElementById('displayRole').innerText = `Role: ${user.role}`;
+                    
+                    document.getElementById('inputFullName').value = user.fullName;
+                    document.getElementById('inputEmail').value = user.email;
+
+                    // Buat inisial avatar otomatis dari nama
+                    const initials = user.fullName.split(' ').map(n => n[0]).join('').substring(0, 2).toUpperCase();
+                    document.getElementById('profileAvatar').innerText = initials;
+                }
+            } catch (err) {
+                console.error("Gagal memuat data profil.");
+            }
+        }
+
+        async function handleUpdateProfile(e) {
+            e.preventDefault();
+            const fullName = document.getElementById('inputFullName').value;
+            const password = document.getElementById('inputPassword').value;
+            const token = localStorage.getItem('sso_token');
+            const statusText = document.getElementById('updateStatusText');
+
+            try {
+                const response = await fetch(`${API_URL}/profile`, {
+                    method: 'PUT',
+                    headers: { 
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${token}`
+                    },
+                    body: JSON.stringify({ fullName, password })
+                });
+
+                const data = await response.json();
+
+                if (response.ok) {
+                    localStorage.setItem('sso_name', data.name);
+                    renderNavbar(); // Segarkan nama di navbar
+                    
+                    statusText.classList.remove('hidden');
+                    setTimeout(() => statusText.classList.add('hidden'), 4000);
+                    
+                    fetchUserProfileInternal(); // Muat ulang data profil
+                    document.getElementById('inputPassword').value = '';
+                } else {
+                    alert("Gagal memperbarui: " + data.message);
+                }
+            } catch (err) {
+                alert('Tidak dapat terhubung ke server database.');
+            }
+        }
+
+        // Inisialisasi saat web dimuat
+        document.addEventListener('DOMContentLoaded', () => {
+            renderNavbar();
+            showView('homeView'); // Pastikan selalu mulai dari halaman depan
+        });
+    </script>
+</body>
+</html>
