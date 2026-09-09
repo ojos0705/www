@@ -440,20 +440,18 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fullName, email, password })
                 });
-
-                // Mengantisipasi jika server mengembalikan error 500 berformat HTML
-                const data = await response.json().catch(() => ({ message: 'Terjadi kesalahan pada server (500).' }));
-
-                if (!response.ok) {
-                    throw new Error(data.message || `Server Error (${response.status})`);
+                const data = await response.json();
+                
+                if(response.ok) {
+                    alert('Registrasi Berhasil! Data Anda telah masuk database. Silakan Login.');
+                    document.getElementById('registerForm').reset();
+                    toggleModal('registerModal');
+                    toggleModal('loginModal');
+                } else {
+                    alert("Gagal: " + data.message);
                 }
-
-                alert('Registrasi Berhasil! Data Anda telah masuk database. Silakan Login.');
-                document.getElementById('registerForm').reset();
-                toggleModal('registerModal');
-                toggleModal('loginModal');
             } catch (err) {
-                alert("Gagal Registrasi: " + err.message);
+                alert('Gagal terhubung ke server. Pastikan node server.js berjalan.');
             }
         }
 
@@ -469,31 +467,40 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                // Mengantisipasi jika server mengembalikan error 500 berformat HTML
-                const data = await response.json().catch(() => ({ message: 'Terjadi kesalahan pada server (500).' }));
+                // Ambil data respons (Coba parse sebagai JSON, jika gagal fallback ke text)
+                let data;
+                const contentType = response.headers.get("content-type");
+                if (contentType && contentType.includes("application/json")) {
+                    data = await response.json();
+                } else {
+                    const rawText = await response.text();
+                    data = { message: rawText || `Server error status: ${response.status}` };
+                }
 
+                // Cek apakah HTTP status bukan 2xx
                 if (!response.ok) {
                     throw new Error(data.message || `Server Error (${response.status})`);
                 }
 
-                // Simpan sesi login
+                // --- Logika jika Login Berhasil ---
                 localStorage.setItem('sso_token', data.token);
                 localStorage.setItem('sso_name', data.name);
                 localStorage.setItem('sso_role', data.role);
-                
+
                 document.getElementById('loginForm').reset();
                 toggleModal('loginModal');
                 renderNavbar();
-                
-                // Pengalihan halaman berdasarkan role
+
                 if (data.role === 'admin') {
                     showView('adminView');
                 } else {
                     showView('homeView');
-                    alert("Login berhasil! Silakan klik 'Buka Aplikasi' pada layanan PWA yang Anda butuhkan.");
+                    alert("Login berhasil!");
                 }
-            } catch (err) {
-                alert("Gagal Login: " + err.message);
+
+            } catch (error) {
+                console.error("Login failed:", error);
+                alert(error.message); // Menampilkan pesan error spesifik dari server
             }
         }
 
