@@ -318,7 +318,12 @@
                 </div>
                 <div class="mb-6">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
-                    <input type="password" id="regPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
+                    <div class="relative">
+                        <input type="password" id="regPassword" autocomplete="new-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition pr-12" required>
+                        <button type="button" onclick="toggleRegPasswordVisibility()" class="absolute inset-y-0 right-0 px-4 text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <i id="regEyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
                 <button type="submit" class="w-full bg-brand text-white py-3 rounded-lg font-bold hover:bg-sky-600 transition shadow-lg">Daftar Sekarang</button>
                 <p class="mt-4 text-center text-sm text-gray-600">Sudah punya akun? <a href="#" onclick="toggleModal('registerModal'); toggleModal('loginModal')" class="text-brand font-bold hover:underline">Login di sini</a></p>
@@ -334,14 +339,31 @@
                 <button onclick="toggleModal('loginModal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="loginForm" onsubmit="handleLogin(event)">
+                <!-- Input Email -->
                 <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
                     <input type="email" id="logEmail" autocomplete="username" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
                 </div>
-                <div class="mb-6">
+
+                <!-- Input Password dengan Toggle Lihat/Sembunyikan -->
+                <div class="mb-4">
                     <label class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
-                    <input type="password" id="logPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
+                    <div class="relative">
+                        <input type="password" id="logPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition pr-12" required>
+                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 px-4 text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        </button>
+                    </div>
                 </div>
+
+                <!-- Checkbox Ingat Saya (Remember Me) -->
+                <div class="flex items-center justify-between mb-6">
+                    <label class="flex items-center text-sm text-gray-600 cursor-pointer">
+                        <input type="checkbox" id="rememberMe" class="w-4 h-4 text-dark border-gray-300 rounded focus:ring-dark mr-2">
+                        Ingat email & sandi saya
+                    </label>
+                </div>
+
                 <button type="submit" class="w-full bg-dark text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition shadow-lg">Masuk (Login)</button>
                 <p class="mt-4 text-center text-sm text-gray-600">Belum punya akun? <a href="#" onclick="toggleModal('loginModal'); toggleModal('registerModal')" class="text-brand font-bold hover:underline">Daftar gratis</a></p>
             </form>
@@ -394,6 +416,48 @@
                 console.log(`Mengalihkan ke ${appName}...`);
                 window.location.href = targetUrl; 
             }
+        }
+
+        // 1. Fungsi Toggle Lihat/Sembunyikan Password
+        function togglePasswordVisibility() {
+            const passwordInput = document.getElementById('logPassword');
+            const eyeIcon = document.getElementById('eyeIcon');
+            
+            if (passwordInput.type === 'password') {
+                passwordInput.type = 'text';
+                eyeIcon.classList.remove('fa-eye');
+                eyeIcon.classList.add('fa-eye-slash');
+            } else {
+                passwordInput.type = 'password';
+                eyeIcon.classList.remove('fa-eye-slash');
+                eyeIcon.classList.add('fa-eye');
+            }
+        }
+
+        // 2. Muat otomatis email & password yang tersimpan saat halaman dimuat
+        document.addEventListener("DOMContentLoaded", () => {
+            const savedEmail = localStorage.getItem('saved_email');
+            const savedPass = localStorage.getItem('saved_pass');
+            
+            if (savedEmail && savedPass) {
+                document.getElementById('logEmail').value = savedEmail;
+                document.getElementById('logPassword').value = savedPass;
+                document.getElementById('rememberMe').checked = true;
+            }
+        });
+
+        // 3. Modifikasi fungsi handleLogin untuk menangani "Remember Me"
+        // (Sisipkan logika ini di dalam fungsi handleLogin yang sudah ada saat sukses login)
+        const rememberMeCheckbox = document.getElementById('rememberMe');
+        const emailVal = document.getElementById('logEmail').value;
+        const passVal = document.getElementById('logPassword').value;
+
+        if (rememberMeCheckbox.checked) {
+            localStorage.setItem('saved_email', emailVal);
+            localStorage.setItem('saved_pass', passVal);
+        } else {
+            localStorage.removeItem('saved_email');
+            localStorage.removeItem('saved_pass');
         }
 
         // Render Navbar Berdasarkan Status Login
