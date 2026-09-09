@@ -440,18 +440,20 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ fullName, email, password })
                 });
-                const data = await response.json();
-                
-                if(response.ok) {
-                    alert('Registrasi Berhasil! Data Anda telah masuk database. Silakan Login.');
-                    document.getElementById('registerForm').reset();
-                    toggleModal('registerModal');
-                    toggleModal('loginModal');
-                } else {
-                    alert("Gagal: " + data.message);
+
+                // Mengantisipasi jika server mengembalikan error 500 berformat HTML
+                const data = await response.json().catch(() => ({ message: 'Terjadi kesalahan pada server (500).' }));
+
+                if (!response.ok) {
+                    throw new Error(data.message || `Server Error (${response.status})`);
                 }
+
+                alert('Registrasi Berhasil! Data Anda telah masuk database. Silakan Login.');
+                document.getElementById('registerForm').reset();
+                toggleModal('registerModal');
+                toggleModal('loginModal');
             } catch (err) {
-                alert('Gagal terhubung ke server. Pastikan node server.js berjalan.');
+                alert("Gagal Registrasi: " + err.message);
             }
         }
 
@@ -466,29 +468,32 @@
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ email, password })
                 });
-                const data = await response.json();
 
-                if(response.ok) {
-                    localStorage.setItem('sso_token', data.token);
-                    localStorage.setItem('sso_name', data.name);
-                    localStorage.setItem('sso_role', data.role);
-                    
-                    document.getElementById('loginForm').reset();
-                    toggleModal('loginModal');
-                    renderNavbar();
-                    
-                    // 2. Arahkan pengguna berdasarkan Hak Akses (Role)
-                    if (data.role === 'admin') {
-                        showView('adminView'); // Buka dashboard untuk admin
-                    } else {
-                        showView('homeView'); // Tetap di halaman utama untuk user biasa
-                        alert("Login berhasil! Silakan klik 'Buka Aplikasi' pada layanan PWA yang Anda butuhkan.");
-                    }
+                // Mengantisipasi jika server mengembalikan error 500 berformat HTML
+                const data = await response.json().catch(() => ({ message: 'Terjadi kesalahan pada server (500).' }));
+
+                if (!response.ok) {
+                    throw new Error(data.message || `Server Error (${response.status})`);
+                }
+
+                // Simpan sesi login
+                localStorage.setItem('sso_token', data.token);
+                localStorage.setItem('sso_name', data.name);
+                localStorage.setItem('sso_role', data.role);
+                
+                document.getElementById('loginForm').reset();
+                toggleModal('loginModal');
+                renderNavbar();
+                
+                // Pengalihan halaman berdasarkan role
+                if (data.role === 'admin') {
+                    showView('adminView');
                 } else {
-                    alert("Gagal: " + data.message);
+                    showView('homeView');
+                    alert("Login berhasil! Silakan klik 'Buka Aplikasi' pada layanan PWA yang Anda butuhkan.");
                 }
             } catch (err) {
-                alert('Gagal terhubung ke server. Pastikan node server.js berjalan.');
+                alert("Gagal Login: " + err.message);
             }
         }
 
