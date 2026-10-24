@@ -48,7 +48,7 @@
     <main class="flex-grow pt-16">
         
         <!-- ========================================== -->
-        <!-- VIEW 1: LANDING PAGE (Terlihat secara default) -->
+        <!-- VIEW 1: LANDING PAGE -->
         <!-- ========================================== -->
         <div id="homeView" class="fade-in block">
             <!-- Hero Section -->
@@ -144,9 +144,8 @@
             </section>
         </div>
 
-
         <!-- ========================================== -->
-        <!-- VIEW 2: ADMIN DASHBOARD (Tersembunyi)      -->
+        <!-- VIEW 2: ADMIN DASHBOARD -->
         <!-- ========================================== -->
         <div id="adminView" class="hidden fade-in bg-gray-100 min-h-[calc(100vh-4rem)] p-6 md:p-10">
             <div class="max-w-7xl mx-auto">
@@ -160,7 +159,6 @@
                     </button>
                 </div>
 
-                <!-- Alert Loading/Error -->
                 <div id="dashboardAlert" class="mb-6 hidden px-4 py-3 rounded-lg text-sm font-medium"></div>
 
                 <!-- Kartu Metrik -->
@@ -184,7 +182,7 @@
                     </div>
                 </div>
 
-                <!-- Grafik Dummy / Tabel Terbaru -->
+                <!-- Tabel Log Transaksi -->
                 <div class="bg-white rounded-2xl shadow-sm border border-gray-200 p-6">
                     <h3 class="text-lg font-bold mb-4">Log Transaksi Terbaru (Simulasi)</h3>
                     <div class="overflow-x-auto">
@@ -224,106 +222,86 @@
         </div>
 
         <!-- ========================================== -->
-        <!-- VIEW 3: USER PROFILE (Tersembunyi)         -->
+        <!-- VIEW 3: USER PROFILE -->
         <!-- ========================================== -->
-        <div id="profileView" class="fade-in bg-gray-50/50 min-h-[calc(100vh-4rem)] p-4 md:p-8">
+        <div id="profileView" class="hidden fade-in bg-gray-50/50 min-h-[calc(100vh-4rem)] p-4 md:p-8">
             <div class="max-w-6xl mx-auto space-y-6">
-                
-                <!-- Header Halaman -->
                 <div>
                     <h1 class="text-2xl font-bold text-gray-800">Pengaturan Akun</h1>
                     <p class="text-xs text-gray-500 mt-1">Kelola informasi profil, keamanan, langganan, dan integrasi sistem Anda.</p>
                 </div>
 
-                <!-- Layout Utama: Sidebar Menu & Konten -->
                 <div class="grid grid-cols-1 lg:grid-cols-4 gap-6 items-start">
-                
-                <!-- Navigasi Tab (Sidebar) -->
-                <nav class="bg-white p-2 rounded-2xl border border-gray-200/80 shadow-sm flex lg:flex-col overflow-x-auto gap-1">
-                    
-                    <button onclick="switchTab('tab-general')" id="btn-tab-general" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition text-sky-600 bg-sky-50">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
-                        <span class="whitespace-nowrap">Data Diri</span>
-                    </button>
+                    <!-- Sidebar Tab -->
+                    <nav class="bg-white p-2 rounded-2xl border border-gray-200/80 shadow-sm flex lg:flex-col overflow-x-auto gap-1">
+                        <button onclick="switchTab('tab-general')" id="btn-tab-general" class="tab-btn active w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl transition text-sky-600 bg-sky-50">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M16 7a4 4 0 11-8 0 4 4 0 018 0zM12 14a7 7 0 00-7 7h14a7 7 0 00-7-7z"/></svg>
+                            <span class="whitespace-nowrap">Data Diri</span>
+                        </button>
+                        <button onclick="switchTab('tab-security')" id="btn-tab-security" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
+                            <span class="whitespace-nowrap">Keamanan</span>
+                        </button>
+                        <button onclick="switchTab('tab-billing')" id="btn-tab-billing" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
+                            <span class="whitespace-nowrap">Billing & Langganan</span>
+                        </button>
+                        <button onclick="switchTab('tab-notifications')" id="btn-tab-notifications" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
+                            <span class="whitespace-nowrap">Notifikasi</span>
+                        </button>
+                        <button onclick="switchTab('tab-integrations')" id="btn-tab-integrations" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
+                            <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 012 2v4a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2h4zm0 10a2 2 0 012 2v4a2 2 0 01-2 2H7a2 2 0 01-2-2v-4a2 2 0 012-2h4zM19 4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V6a2 2 0 012-2h4z"/></svg>
+                            <span class="whitespace-nowrap">Integrasi API</span>
+                        </button>
+                    </nav>
 
-                    <button onclick="switchTab('tab-security')" id="btn-tab-security" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"/></svg>
-                        <span class="whitespace-nowrap">Keamanan</span>
-                    </button>
-
-                    <button onclick="switchTab('tab-billing')" id="btn-tab-billing" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 10h18M7 15h1m4 0h1m-7 4h12a2 2 0 002-2V8a2 2 0 00-2-2H5a2 2 0 00-2 2v8a2 2 0 002 2z"/></svg>
-                        <span class="whitespace-nowrap">Billing & Langganan</span>
-                    </button>
-
-                    <button onclick="switchTab('tab-notifications')" id="btn-tab-notifications" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 17h5l-1.405-1.405A2.032 2.032 0 0118 14.158V11a6.002 6.002 0 00-4-5.659V5a2 2 0 10-4 0v.341C7.67 6.165 6 8.388 6 11v3.159c0 .538-.214 1.055-.595 1.436L4 17h5m6 0v1a3 3 0 11-6 0v-1m6 0H9"/></svg>
-                        <span class="whitespace-nowrap">Notifikasi</span>
-                    </button>
-
-                    <button onclick="switchTab('tab-integrations')" id="btn-tab-integrations" class="tab-btn w-full flex items-center gap-3 px-4 py-3 text-xs font-semibold rounded-xl text-gray-600 hover:bg-gray-50 transition">
-                        <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M11 4a2 2 0 012 2v4a2 2 0 01-2 2H7a2 2 0 01-2-2V6a2 2 0 012-2h4zm0 10a2 2 0 012 2v4a2 2 0 01-2 2H7a2 2 0 01-2-2v-4a2 2 0 012-2h4zM19 4a2 2 0 012 2v4a2 2 0 01-2 2h-4a2 2 0 01-2-2V6a2 2 0 012-2h4z"/></svg>
-                        <span class="whitespace-nowrap">Integrasi API</span>
-                    </button>
-
-                </nav>
-
-                <!-- Panel Konten Tab -->
-                <div class="lg:col-span-3 space-y-6">
-
-                    <!-- TAB 1: DATA DIRI -->
-                    <div id="tab-general" class="tab-content bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-6">
-                        <div class="border-b border-gray-100 pb-4">
-                            <h2 class="text-base font-bold text-gray-800">Profil Pengguna</h2>
-                            <p class="text-xs text-gray-500">Perbarui foto dan informasi identitas Anda.</p>
+                    <!-- Konten Tab -->
+                    <div class="lg:col-span-3 space-y-6">
+                        <!-- TAB 1: DATA DIRI -->
+                        <div id="tab-general" class="tab-content bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-6">
+                            <div class="border-b border-gray-100 pb-4">
+                                <h2 class="text-base font-bold text-gray-800">Profil Pengguna</h2>
+                                <p class="text-xs text-gray-500">Perbarui informasi identitas dan akun Anda.</p>
+                            </div>
+                            <form onsubmit="handleUpdateProfile(event)" class="space-y-4">
+                                <div class="flex items-center gap-4">
+                                    <div class="w-16 h-16 rounded-full bg-sky-500 text-white font-bold text-xl flex items-center justify-center border-2 border-white shadow-md" id="profileAvatar">
+                                        US
+                                    </div>
+                                    <div>
+                                        <p class="text-xs font-bold text-gray-800" id="displayFullName">--</p>
+                                        <p class="text-[11px] text-gray-500" id="displayEmail">--</p>
+                                        <p class="text-[10px] text-sky-600 font-semibold mt-1" id="displayRole">Role: User</p>
+                                    </div>
+                                </div>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Lengkap</label>
+                                        <input type="text" id="inputFullName" class="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs text-gray-800 focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition" required>
+                                    </div>
+                                    <div>
+                                        <label class="block text-xs font-semibold text-gray-600 mb-1">Email (Read-Only)</label>
+                                        <input type="email" id="inputEmail" disabled class="w-full px-3.5 py-2 bg-gray-100 border border-gray-200 rounded-xl text-xs text-gray-400 cursor-not-allowed outline-none">
+                                    </div>
+                                </div>
+                                <div class="pt-4 border-t border-gray-100 flex items-center justify-between">
+                                    <span id="updateStatusText" class="text-xs text-emerald-600 font-semibold hidden"><i class="fa-solid fa-check"></i> Profil berhasil diperbarui!</span>
+                                    <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold rounded-xl shadow transition ml-auto">Simpan Perubahan</button>
+                                </div>
+                            </form>
                         </div>
-
-                        <form onsubmit="handleSaveGeneral(event)" class="space-y-4">
-                            <div class="flex items-center gap-4">
-                                <div class="w-16 h-16 rounded-full bg-sky-500 text-white font-bold text-xl flex items-center justify-center border-2 border-white shadow-md">
-                                    JP
-                                </div>
-                                <div>
-                                    <button type="button" class="px-3 py-1.5 bg-gray-100 hover:bg-gray-200 text-gray-700 text-xs font-semibold rounded-xl transition">Ganti Foto</button>
-                                    <p class="text-[11px] text-gray-400 mt-1">JPG, PNG maks 2MB</p>
-                                </div>
-                            </div>
-
-                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 pt-2">
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Nama Lengkap</label>
-                                    <input type="text" id="profileName" value="Joko Prasetyo" autocomplete="name" class="w-full px-3.5 py-2 bg-gray-50/50 border border-gray-300 rounded-xl text-xs text-gray-800 focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
-                                </div>
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Email</label>
-                                    <input type="email" value="joko@example.com" disabled class="w-full px-3.5 py-2 bg-gray-100 border border-gray-200 rounded-xl text-xs text-gray-400 cursor-not-allowed outline-none">
-                                </div>
-                            </div>
-
-                            <div class="pt-4 border-t border-gray-100 flex justify-end">
-                                <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold rounded-xl shadow transition">Simpan Profil</button>
-                            </div>
-                        </form>
-                    </div>
 
                         <!-- TAB 2: KEAMANAN -->
                         <div id="tab-security" class="tab-content hidden bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-6">
                             <div class="border-b border-gray-100 pb-4">
                                 <h2 class="text-base font-bold text-gray-800">Keamanan Akun</h2>
-                                <p class="text-xs text-gray-500">Kelola kata sandi dan proteksi tambahan.</p>
+                                <p class="text-xs text-gray-500">Perbarui kata sandi akun Anda secara berkala.</p>
                             </div>
-
-                            <form onsubmit="handleSaveSecurity(event)" class="space-y-4 max-w-md">
-                                <!-- Input username tersembunyi untuk aksesibilitas Chrome -->
-                                <input type="text" name="username" value="user@example.com" autocomplete="username" class="hidden">
-
-                                <div>
-                                    <label class="block text-xs font-semibold text-gray-600 mb-1">Kata Sandi Saat Ini</label>
-                                    <input type="password" autocomplete="current-password" class="w-full px-3.5 py-2 bg-gray-50/50 border border-gray-300 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
-                                </div>
+                            <form onsubmit="handleUpdateProfile(event)" class="space-y-4 max-w-md">
                                 <div>
                                     <label class="block text-xs font-semibold text-gray-600 mb-1">Kata Sandi Baru</label>
-                                    <input type="password" autocomplete="new-password" class="w-full px-3.5 py-2 bg-gray-50/50 border border-gray-300 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
+                                    <input type="password" id="inputPassword" autocomplete="new-password" placeholder="Kosongkan jika tidak diubah" class="w-full px-3.5 py-2 bg-gray-50 border border-gray-300 rounded-xl text-xs focus:bg-white focus:ring-2 focus:ring-sky-500 outline-none transition">
                                 </div>
                                 <div class="pt-2">
                                     <button type="submit" class="px-4 py-2 bg-sky-500 hover:bg-sky-600 text-white text-xs font-semibold rounded-xl shadow transition">Perbarui Kata Sandi</button>
@@ -331,20 +309,19 @@
                             </form>
                         </div>
 
-                        <!-- TAB 3: BILLING & LANGGANAN -->
+                        <!-- TAB 3: BILLING -->
                         <div id="tab-billing" class="tab-content hidden bg-white p-6 rounded-2xl border border-gray-200/80 shadow-sm space-y-6">
                             <div class="border-b border-gray-100 pb-4 flex justify-between items-center">
                                 <div>
-                                <h2 class="text-base font-bold text-gray-800">Billing & Paket</h2>
-                                <p class="text-xs text-gray-500">Informasi paket aktif dan riwayat transaksi.</p>
+                                    <h2 class="text-base font-bold text-gray-800">Billing & Paket</h2>
+                                    <p class="text-xs text-gray-500">Informasi paket aktif dan riwayat transaksi.</p>
                                 </div>
                                 <span class="px-3 py-1 bg-emerald-50 text-emerald-600 text-xs font-bold rounded-full">Paket Pro (Aktif)</span>
                             </div>
-
                             <div class="p-4 bg-sky-50/50 rounded-xl border border-sky-100 flex items-center justify-between">
                                 <div>
-                                <p class="text-xs font-bold text-sky-900">Perpanjangan Otomatis</p>
-                                <p class="text-[11px] text-sky-600">Tagihan berikutnya pada 15 Oktober 2026</p>
+                                    <p class="text-xs font-bold text-sky-900">Perpanjangan Otomatis</p>
+                                    <p class="text-[11px] text-sky-600">Tagihan berikutnya pada 15 Oktober 2026</p>
                                 </div>
                                 <button class="px-3 py-1.5 bg-white text-sky-600 text-xs font-semibold rounded-lg shadow-sm hover:bg-sky-50 border border-sky-200 transition">Kelola Metode</button>
                             </div>
@@ -356,15 +333,14 @@
                                 <h2 class="text-base font-bold text-gray-800">Preferensi Notifikasi</h2>
                                 <p class="text-xs text-gray-500">Pilih pesan apa saja yang ingin diterima via email.</p>
                             </div>
-
                             <div class="space-y-3">
                                 <label class="flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer">
-                                <span class="text-xs font-semibold text-gray-700">Email Pembayaran & Faktur</span>
-                                <input type="checkbox" checked class="w-4 h-4 text-sky-500 rounded focus:ring-sky-400">
+                                    <span class="text-xs font-semibold text-gray-700">Email Pembayaran & Faktur</span>
+                                    <input type="checkbox" checked class="w-4 h-4 text-sky-500 rounded focus:ring-sky-400">
                                 </label>
                                 <label class="flex items-center justify-between p-3 bg-gray-50 rounded-xl cursor-pointer">
-                                <span class="text-xs font-semibold text-gray-700">Laporan Mingguan Aktivitas</span>
-                                <input type="checkbox" class="w-4 h-4 text-sky-500 rounded focus:ring-sky-400">
+                                    <span class="text-xs font-semibold text-gray-700">Laporan Mingguan Aktivitas</span>
+                                    <input type="checkbox" class="w-4 h-4 text-sky-500 rounded focus:ring-sky-400">
                                 </label>
                             </div>
                         </div>
@@ -375,17 +351,16 @@
                                 <h2 class="text-base font-bold text-gray-800">Integrasi API & Layanan</h2>
                                 <p class="text-xs text-gray-500">Hubungkan aplikasi dengan layanan pihak ketiga.</p>
                             </div>
-
                             <div class="space-y-3">
                                 <div class="flex items-center justify-between p-3 border border-gray-200 rounded-xl">
-                                <div class="flex items-center gap-3">
-                                    <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs">M</div>
-                                    <div>
-                                    <p class="text-xs font-bold text-gray-800">Midtrans Payment Gateway</p>
-                                    <p class="text-[11px] text-gray-400">Terhubung</p>
+                                    <div class="flex items-center gap-3">
+                                        <div class="w-8 h-8 bg-blue-50 text-blue-600 rounded-lg flex items-center justify-center font-bold text-xs">M</div>
+                                        <div>
+                                            <p class="text-xs font-bold text-gray-800">Midtrans Payment Gateway</p>
+                                            <p class="text-[11px] text-gray-400">Terhubung</p>
+                                        </div>
                                     </div>
-                                </div>
-                                <button class="px-3 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition">Putuskan</button>
+                                    <button class="px-3 py-1 bg-red-50 text-red-600 text-xs font-semibold rounded-lg hover:bg-red-100 transition">Putuskan</button>
                                 </div>
                             </div>
                         </div>
@@ -430,36 +405,27 @@
     <div id="loginModal" class="fixed inset-0 bg-dark bg-opacity-75 hidden flex justify-center items-center z-[100] backdrop-blur-sm">
         <div class="bg-white p-8 rounded-2xl shadow-2xl w-full max-w-md transform transition-all">
             <div class="flex justify-between items-center mb-6">
-                <h2 class="text-2xl font-extrabold text-dark">Login Ekosistem</h2>
+                <h2 class="text-2xl font-extrabold text-dark" data-i18n="loginTitle">Login Ekosistem</h2>
                 <button onclick="toggleModal('loginModal')" class="text-gray-400 hover:text-red-500 text-xl"><i class="fa-solid fa-xmark"></i></button>
             </div>
             <form id="loginForm" onsubmit="handleLogin(event)">
-                <!-- Input Email -->
                 <div class="mb-4">
-                    <label for="logEmail" class="block text-sm font-medium text-gray-700 mb-1">Alamat Email</label>
-                    <input type="email" id="logEmail" autocomplete="username" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition" required>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="emailLabel">Alamat Email</label>
+                    <input type="email" id="logEmail" autocomplete="username" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark outline-none" required>
                 </div>
-
+                
+                <!-- BAGIAN PASSWORD DENGAN IKON MATA -->
                 <div class="mb-4">
-                    <label for="logPassword" class="block text-sm font-medium text-gray-700 mb-1">Kata Sandi</label>
+                    <label class="block text-sm font-medium text-gray-700 mb-1" data-i18n="passwordLabel">Kata Sandi</label>
                     <div class="relative">
-                        <input type="password" id="logPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark focus:border-dark outline-none transition pr-12" required>
-                        <button type="button" onclick="togglePasswordVisibility()" class="absolute inset-y-0 right-0 px-4 text-gray-400 hover:text-gray-600 focus:outline-none">
-                            <i id="eyeIcon" class="fa-solid fa-eye"></i>
+                        <input type="password" id="logPassword" autocomplete="current-password" class="w-full px-4 py-3 bg-gray-50 border border-gray-300 rounded-lg focus:ring-2 focus:ring-dark outline-none pr-12" required>
+                        <button type="button" onclick="togglePasswordVisibility('logPassword', 'logEyeIcon')" class="absolute inset-y-0 right-0 px-4 text-gray-400 hover:text-gray-600 focus:outline-none">
+                            <i id="logEyeIcon" class="fa-solid fa-eye"></i>
                         </button>
                     </div>
                 </div>
 
-                <!-- Checkbox Ingat Saya (Remember Me) -->
-                <div class="flex items-center justify-between mb-6">
-                    <label class="flex items-center text-sm text-gray-600 cursor-pointer">
-                        <input type="checkbox" id="rememberMe" class="w-4 h-4 text-dark border-gray-300 rounded focus:ring-dark mr-2">
-                        Ingat email & sandi saya
-                    </label>
-                </div>
-
-                <button type="submit" class="w-full bg-dark text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition shadow-lg">Masuk (Login)</button>
-                <p class="mt-4 text-center text-sm text-gray-600">Belum punya akun? <a href="#" onclick="toggleModal('loginModal'); toggleModal('registerModal')" class="text-brand font-bold hover:underline">Daftar gratis</a></p>
+                <button type="submit" class="w-full bg-dark text-white py-3 rounded-lg font-bold hover:bg-gray-800 transition shadow-lg" data-i18n="loginSubmit">Masuk (Login)</button>
             </form>
         </div>
     </div>
@@ -467,30 +433,25 @@
     <!-- Script Logika Frontend -->
     <script>
         const API_URL = window.location.hostname === 'localhost' 
-        ? 'http://localhost:3000/api' 
-        : '/api';
+            ? 'http://localhost:3000/api' 
+            : '/api';
 
-        // Manajemen UI
+        // Manajemen UI Modal & View
         function toggleModal(modalID) {
             const modal = document.getElementById(modalID);
-            if (modal.classList.contains('hidden')) {
-                modal.classList.remove('hidden');
-            } else {
-                modal.classList.add('hidden');
+            if (modal) {
+                modal.classList.toggle('hidden');
             }
         }
 
         function showView(viewName) {
-            // Sembunyikan semua view utama
             document.getElementById('homeView').classList.add('hidden');
             document.getElementById('adminView').classList.add('hidden');
-            
-            // Pastikan elemen profileView ada sebelum memodifikasinya
             const profileView = document.getElementById('profileView');
             if(profileView) profileView.classList.add('hidden');
 
-            // Tampilkan view yang dipilih
-            document.getElementById(viewName).classList.remove('hidden');
+            const targetView = document.getElementById(viewName);
+            if(targetView) targetView.classList.remove('hidden');
 
             if(viewName === 'adminView') {
                 fetchAdminMetrics();
@@ -505,9 +466,6 @@
                 alert(`Silakan login terlebih dahulu untuk mengakses ${appName}.`);
                 toggleModal('loginModal');
             } else {
-                // Karena PWA berada di domain yang sama (localhost), token di localStorage otomatis terbaca oleh PWA.
-                // Kita hanya perlu mengarahkan user ke direktori PWA tersebut.
-                console.log(`Mengalihkan ke ${appName}...`);
                 window.location.href = targetUrl; 
             }
         }
@@ -515,95 +473,79 @@
         function toggleRegPasswordVisibility() {
             const passwordInput = document.getElementById('regPassword');
             const eyeIcon = document.getElementById('regEyeIcon');
-            
+            if (!passwordInput) return;
             if (passwordInput.type === 'password') {
                 passwordInput.type = 'text';
-                eyeIcon.classList.remove('fa-eye');
-                eyeIcon.classList.add('fa-eye-slash');
+                eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 passwordInput.type = 'password';
-                eyeIcon.classList.remove('fa-eye-slash');
-                eyeIcon.classList.add('fa-eye');
+                eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
-        // 1. Fungsi Toggle Lihat/Sembunyikan Password
         function togglePasswordVisibility(inputId, eyeIconId) {
             const input = document.getElementById(inputId);
             const eyeIcon = document.getElementById(eyeIconId);
-            
             if (!input) return;
-            
             if (input.type === 'password') {
                 input.type = 'text';
-                if (eyeIcon) {
-                    eyeIcon.classList.remove('fa-eye');
-                    eyeIcon.classList.add('fa-eye-slash');
-                }
+                if (eyeIcon) eyeIcon.classList.replace('fa-eye', 'fa-eye-slash');
             } else {
                 input.type = 'password';
-                if (eyeIcon) {
-                    eyeIcon.classList.remove('fa-eye-slash');
-                    eyeIcon.classList.add('fa-eye');
-                }
+                if (eyeIcon) eyeIcon.classList.replace('fa-eye-slash', 'fa-eye');
             }
         }
 
-        // 2. Muat otomatis email & password yang tersimpan saat halaman dimuat
+        // Muat otomatis email & password tersimpan (Remember Me)
         document.addEventListener("DOMContentLoaded", () => {
             const savedEmail = localStorage.getItem('saved_email');
             const savedPass = localStorage.getItem('saved_pass');
             
             if (savedEmail && savedPass) {
-                document.getElementById('logEmail').value = savedEmail;
-                document.getElementById('logPassword').value = savedPass;
-                document.getElementById('rememberMe').checked = true;
+                const logEmailEl = document.getElementById('logEmail');
+                const logPassEl = document.getElementById('logPassword');
+                const rememberEl = document.getElementById('rememberMe');
+                if(logEmailEl) logEmailEl.value = savedEmail;
+                if(logPassEl) logPassEl.value = savedPass;
+                if(rememberEl) rememberEl.checked = true;
             }
+            renderNavbar();
+            showView('homeView');
         });
-
-        // 3. Modifikasi fungsi handleLogin untuk menangani "Remember Me"
-        // (Sisipkan logika ini di dalam fungsi handleLogin yang sudah ada saat sukses login)
-        const rememberMeCheckbox = document.getElementById('rememberMe');
-        const emailVal = document.getElementById('logEmail').value;
-        const passVal = document.getElementById('logPassword').value;
-
-        if (rememberMeCheckbox.checked) {
-            localStorage.setItem('saved_email', emailVal);
-            localStorage.setItem('saved_pass', passVal);
-        } else {
-            localStorage.removeItem('saved_email');
-            localStorage.removeItem('saved_pass');
-        }
 
         // Render Navbar Berdasarkan Status Login
         function renderNavbar() {
             const token = localStorage.getItem('sso_token');
             const name = localStorage.getItem('sso_name') || 'User';
+            const role = localStorage.getItem('sso_role') || 'user';
             const authMenu = document.getElementById('authMenu');
+            if(!authMenu) return;
 
             if (token) {
-                // User Logged In
                 const initial = name ? name.charAt(0).toUpperCase() : 'U';
+                let adminButtonHtml = '';
+                
+                if (role === 'admin') {
+                    adminButtonHtml = `
+                        <button onclick="showView('adminView')" class="bg-dark text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition text-sm flex items-center gap-2">
+                            <i class="fa-solid fa-chart-pie"></i> Dashboard
+                        </button>
+                    `;
+                }
 
                 authMenu.innerHTML = `
-                    <!-- Gabungan Nama User & Navigasi Profil (Menggantikan 2 elemen lama) -->
                     <button onclick="showView('profileView')" class="flex items-center gap-2 px-3 py-1.5 rounded-xl hover:bg-gray-100/80 text-gray-700 text-xs font-semibold transition border border-transparent hover:border-gray-200" title="Buka Pengaturan Profil">
-                        <div class="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-[10px] shadow-sm" id="navAvatar">
+                        <div class="w-6 h-6 rounded-full bg-sky-500 text-white flex items-center justify-center font-bold text-[10px] shadow-sm">
                             ${initial}
                         </div>
-                        <span id="navUserName">${name}</span>
+                        <span>${name}</span>
                     </button>
-
-                    <!-- Tombol Dashboard & Logout Tetap Ada -->
-                    <button onclick="showView('adminView')" class="bg-dark text-white px-4 py-2 rounded-lg font-medium hover:bg-gray-800 transition text-sm flex items-center gap-2">
-                        <i class="fa-solid fa-chart-pie"></i> Dashboard
-                    </button>
+                    ${adminButtonHtml}
                     <button onclick="handleLogout()" class="bg-red-50 text-red-600 border border-red-200 px-4 py-2 rounded-lg font-medium hover:bg-red-600 hover:text-white transition text-sm">
                         Logout
                     </button>
                 `;
             } else {
-                // Not Logged In
                 authMenu.innerHTML = `
                     <button onclick="toggleModal('loginModal')" class="text-gray-700 hover:text-brand font-bold px-3 py-2">Login</button>
                     <button onclick="toggleModal('registerModal')" class="bg-brand text-white px-5 py-2.5 rounded-lg font-bold hover:bg-sky-600 transition shadow-md">Buat Akun</button>
@@ -611,7 +553,7 @@
             }
         }
 
-        // Interaksi API Backend
+        // Interaksi API Backend: Register
         async function handleRegister(e) {
             e.preventDefault();
             const fullName = document.getElementById('regName').value;
@@ -627,22 +569,32 @@
                 const data = await response.json();
                 
                 if(response.ok) {
-                    alert('Registrasi Berhasil! Data Anda telah masuk database. Silakan Login.');
+                    alert('Registrasi Berhasil! Silakan Login.');
                     document.getElementById('registerForm').reset();
                     toggleModal('registerModal');
                     toggleModal('loginModal');
                 } else {
-                    alert("Gagal: " + data.message);
+                    alert("Gagal: " + (data.message || 'Terjadi kesalahan'));
                 }
             } catch (err) {
-                alert('Gagal terhubung ke server. Pastikan node server.js berjalan.');
+                alert('Gagal terhubung ke server backend.');
             }
         }
 
+        // Interaksi API Backend: Login
         async function handleLogin(e) {
             e.preventDefault();
             const email = document.getElementById('logEmail').value;
             const password = document.getElementById('logPassword').value;
+            const rememberMeCheckbox = document.getElementById('rememberMe');
+
+            if (rememberMeCheckbox && rememberMeCheckbox.checked) {
+                localStorage.setItem('saved_email', email);
+                localStorage.setItem('saved_pass', password);
+            } else {
+                localStorage.removeItem('saved_email');
+                localStorage.removeItem('saved_pass');
+            }
 
             try {
                 const response = await fetch(`${API_URL}/login`, {
@@ -651,7 +603,6 @@
                     body: JSON.stringify({ email, password })
                 });
 
-                // Ambil data respons (Coba parse sebagai JSON, jika gagal fallback ke text)
                 let data;
                 const contentType = response.headers.get("content-type");
                 if (contentType && contentType.includes("application/json")) {
@@ -661,12 +612,10 @@
                     data = { message: rawText || `Server error status: ${response.status}` };
                 }
 
-                // Cek apakah HTTP status bukan 2xx
                 if (!response.ok) {
                     throw new Error(data.message || `Server Error (${response.status})`);
                 }
 
-                // --- Logika jika Login Berhasil ---
                 localStorage.setItem('sso_token', data.token);
                 localStorage.setItem('sso_name', data.name);
                 localStorage.setItem('sso_role', data.role);
@@ -684,34 +633,30 @@
 
             } catch (error) {
                 console.error("Login failed:", error);
-                alert(error.message); // Menampilkan pesan error spesifik dari server
+                alert(error.name === 'TypeError' ? "Gagal terhubung ke server. Pastikan server backend sudah menyala." : error.message);
             }
         }
 
         function handleLogout() {
             localStorage.removeItem('sso_token');
             localStorage.removeItem('sso_name');
+            localStorage.removeItem('sso_role');
             renderNavbar();
             showView('homeView');
         }
 
         function switchTab(tabId) {
-            // Sembunyikan seluruh konten tab
             document.querySelectorAll('.tab-content').forEach(content => {
                 content.classList.add('hidden');
             });
-
-            // Reset gaya seluruh tombol tab
             document.querySelectorAll('.tab-btn').forEach(btn => {
                 btn.classList.remove('text-sky-600', 'bg-sky-50');
                 btn.classList.add('text-gray-600');
             });
 
-            // Tampilkan tab yang dipilih
             const activeTab = document.getElementById(tabId);
             if (activeTab) activeTab.classList.remove('hidden');
 
-            // Aktifkan gaya tombol yang diklik
             const activeBtn = document.getElementById(`btn-${tabId}`);
             if (activeBtn) {
                 activeBtn.classList.remove('text-gray-600');
@@ -719,26 +664,13 @@
             }
         }
 
-        function previewAvatar(event) {
-            const file = event.target.files[0];
-            if (file) {
-                const reader = new FileReader();
-                reader.onload = function(e) {
-                    const previewContainer = document.getElementById('avatarPreview');
-                    previewContainer.innerHTML = `<img src="${e.target.result}" class="w-full h-full object-cover rounded-full" alt="Avatar">`;
-                };
-                reader.readAsDataURL(file);
-            }
-        }
-
+        // Ambil Metrik Admin dari Server
         async function fetchAdminMetrics() {
             const token = localStorage.getItem('sso_token');
             const alertBox = document.getElementById('dashboardAlert');
-            
             if(!token) return;
 
             try {
-                // Tampilkan loading state
                 document.getElementById('metricUsers').innerText = '...';
                 document.getElementById('metricTransactions').innerText = '...';
                 
@@ -754,58 +686,45 @@
 
                 if(response.ok) {
                     alertBox.classList.add('hidden');
-                    // Render data dari Database ke UI
-                    document.getElementById('metricUsers').innerText = data.totalUsers.toLocaleString('id-ID');
-                    document.getElementById('metricTransactions').innerText = data.totalTransactions.toLocaleString('id-ID');
-                    document.getElementById('metricPwas').innerText = data.activePwas;
-                    document.getElementById('metricStatus').innerText = data.serverStatus;
-                    document.getElementById('metricUpdate').innerText = `Last update: ${data.lastUpdate}`;
+                    document.getElementById('metricUsers').innerText = (data.totalUsers || 0).toLocaleString('id-ID');
+                    document.getElementById('metricTransactions').innerText = (data.totalTransactions || 0).toLocaleString('id-ID');
+                    document.getElementById('metricPwas').innerText = data.activePwas || 0;
+                    document.getElementById('metricStatus').innerText = data.serverStatus || 'Online';
+                    document.getElementById('metricUpdate').innerText = `Last update: ${data.lastUpdate || '-'}`;
                 } else {
-                    // Tangani token kedaluwarsa atau akses ditolak
                     alertBox.className = "mb-6 px-4 py-3 rounded-lg text-sm font-medium bg-red-100 text-red-700 block";
-                    alertBox.innerText = `Akses ditolak: ${data.message}. Silakan relogin.`;
+                    alertBox.innerText = `Akses ditolak: ${data.message}.`;
                     if(response.status === 401 || response.status === 403) handleLogout();
                 }
             } catch (err) {
                 alertBox.className = "mb-6 px-4 py-3 rounded-lg text-sm font-medium bg-red-100 text-red-700 block";
-                alertBox.innerText = "Error: Tidak dapat menghubungi Database Server.";
+                alertBox.innerText = "Error: Tidak dapat menghubungi server.";
             }
         }
 
+        // Ambil Data Profil User
         async function fetchUserProfileInternal() {
             const token = localStorage.getItem('sso_token');
-            
             try {
-                // 1. Ambil data asli dari server Backend
                 const response = await fetch(`${API_URL}/profile`, {
                     headers: { 'Authorization': `Bearer ${token}` }
                 });
-
-                if (!response.ok) throw new Error('Gagal mengambil data dari server');
-
-                // Data dinamis dari database/API
+                if (!response.ok) throw new Error('Gagal mengambil data profil');
                 const userData = await response.json(); 
-
-                // 2. Tampilkan ke UI
                 renderProfileData(userData);
-
             } catch (error) {
-                console.warn("Backend tidak terhubung. Memuat data dari localStorage/fallback.");
-                
-                // Cadangan: Ambil dari localStorage jika backend offline
-                const localUser = JSON.parse(localStorage.getItem('user_data')) || {
-                    fullName: "Guest User",
-                    email: "guest@example.com",
-                    role: "Visitor"
+                console.warn("Backend offline. Menggunakan cache localStorage.");
+                const localUser = {
+                    fullName: localStorage.getItem('sso_name') || "Pengguna",
+                    email: "user@example.com",
+                    role: localStorage.getItem('sso_role') || "User"
                 };
-                
                 renderProfileData(localUser);
             }
         }
 
-        // Fungsi terpisah untuk memasukkan data ke elemen HTML
         function renderProfileData(userData) {
-            const nameInput = document.getElementById('inputFullName') || document.getElementById('profileName');
+            const nameInput = document.getElementById('inputFullName');
             if (nameInput) nameInput.value = userData.fullName || userData.name || '';
 
             const emailInput = document.getElementById('inputEmail');
@@ -828,10 +747,12 @@
             }
         }
 
+        // Update Profil User
         async function handleUpdateProfile(e) {
             e.preventDefault();
             const fullName = document.getElementById('inputFullName').value;
-            const password = document.getElementById('inputPassword').value;
+            const passwordElement = document.getElementById('inputPassword');
+            const password = passwordElement ? passwordElement.value : '';
             const token = localStorage.getItem('sso_token');
             const statusText = document.getElementById('updateStatusText');
 
@@ -842,33 +763,28 @@
                         'Content-Type': 'application/json',
                         'Authorization': `Bearer ${token}`
                     },
-                    body: JSON.stringify({ fullName, password })
+                    body: JSON.stringify({ fullName, password: password || undefined })
                 });
 
                 const data = await response.json();
 
                 if (response.ok) {
-                    localStorage.setItem('sso_name', data.name);
-                    renderNavbar(); // Segarkan nama di navbar
+                    localStorage.setItem('sso_name', data.name || fullName);
+                    renderNavbar();
                     
-                    statusText.classList.remove('hidden');
-                    setTimeout(() => statusText.classList.add('hidden'), 4000);
-                    
-                    fetchUserProfileInternal(); // Muat ulang data profil
-                    document.getElementById('inputPassword').value = '';
+                    if(statusText) {
+                        statusText.classList.remove('hidden');
+                        setTimeout(() => statusText.classList.add('hidden'), 4000);
+                    }
+                    fetchUserProfileInternal();
+                    if(passwordElement) passwordElement.value = '';
                 } else {
-                    alert("Gagal memperbarui: " + data.message);
+                    alert("Gagal memperbarui: " + (data.message || 'Error'));
                 }
             } catch (err) {
                 alert('Tidak dapat terhubung ke server database.');
             }
         }
-
-        // Inisialisasi saat web dimuat
-        document.addEventListener('DOMContentLoaded', () => {
-            renderNavbar();
-            showView('homeView'); // Pastikan selalu mulai dari halaman depan
-        });
     </script>
 </body>
 </html>

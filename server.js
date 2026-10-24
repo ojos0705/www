@@ -2,133 +2,119 @@ const express = require('express');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
-const sqlite3 = require('sqlite3').verbose();
-const path = require('path');
+const mongoose = require('mongoose');
 
 const app = express();
+
+// Middleware
 app.use(cors());
 app.use(express.json());
 
-const PORT = process.env.PORT || 3000;
-if (process.env.NODE_ENV !== 'production') {
-    app.listen(PORT, () => {
-        console.log(`Server berjalan di http://localhost:${PORT}`);
-    });
+// Konfigurasi Koneksi MongoDB Atlas (Ambil dari Environment Variables Vercel)
+const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://username:password@cluster.mongodb.net/app_ecosystem?retryWrites=true&w=majority';
+
+// Koneksi Database dengan Pola Caching (Optimal untuk Vercel Serverless)
+let isConnected = false;
+async function connectDB() {
+    if (isConnected) return;
+    try {
+        await mongoose.connect(MONGO_URI, {
+            useNewUrlParser: true,
+            useUnifiedTopology: true,
+        });
+        isConnected = true;
+        console.log('Terkoneksi ke MongoDB Atlas.');
+    } catch (error) {
+        console.error('Koneksi database gagal:', error);
+    }
 }
+
+// Skema Pengguna (User Schema)
+const userSchema = new mongoose.Schema({
+    fullName: { type: String, required: true },
+    email: { type: String, required: true, unique: true },
+    password: { type: String, required: true },
+    role: { type: String, default: 'user' },
+    preferredLanguage: { type: String, default: 'id' },
+    createdAt: { type: Date, default: Date.now }
+});
+const User = mongoose.models.User || mongoose.model('User', userSchema);
+
 const SECRET_KEY = process.env.JWT_SECRET || 'KUNCI_RAHASIA_SUPER_AMAN_UNTUK_PWA_ANDA';
 
-// Di Vercel Serverless, gunakan folder sementara /tmp untuk membaca/menulis file sqlite
-const dbPath = process.env.VERCEL 
-  ? path.join('/tmp', 'database.sqlite') 
-  : path.join(__dirname, 'database.sqlite');
+// ================= ROUTES API =================
 
-// Inisialisasi SQLite Database
-const db = new sqlite3.Database(dbPath, (err) => {
-    if (err) {
-        console.error('Error membuka database:', err.message);
-    } else {
-        console.log('Terkoneksi ke database SQLite pada:', dbPath);
-        initDatabase();
-    }
+// Middleware Koneksi DB Otomatis pada Setiap Permintaan API
+app.use(async (req, res, next) => {
+    await connectDB();
+    next();
 });
-
-// Inisialisasi Tabel & Admin
-function initDatabase() {
-    db.serialize(() => {
-        // Tabel Users
-        db.run(`CREATE TABLE IF NOT EXISTS users (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            fullName TEXT,
-            email TEXT UNIQUE,
-            password TEXT,
-            role TEXT DEFAULT 'user',
-            createdAt DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`, (err) => {
-            if (err) return console.error('Error buat tabel users:', err.message);
-
-            // Cek & Buat Admin Default
-            db.get(`SELECT * FROM users WHERE role = 'admin'`, async (err, row) => {
-                if (!err && !row) {
-                    try {
-                        const hashed = await bcrypt.hash('admin123', 10);
-                        db.run(`INSERT INTO users (fullName, email, password, role) VALUES (?, ?, ?, ?)`, 
-                        ['Administrator Utama', 'admin@xiancau.com', hashed, 'admin']);
-                        console.log('Akun Admin default berhasil dibuat.');
-                    } catch (e) {
-                        console.error('Gagal membuat admin default:', e);
-                    }
-                }
-            });
-        });
-
-        // Tabel Log Transaksi
-        db.run(`CREATE TABLE IF NOT EXISTS log_transaksi (
-            id INTEGER PRIMARY KEY AUTOINCREMENT,
-            appName TEXT,
-            aktivitas TEXT,
-            timestamp DATETIME DEFAULT CURRENT_TIMESTAMP
-        )`);
-    });
-}
 
 // Endpoint Registrasi
 app.post('/api/register', async (req, res) => {
-    const { fullName, email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email dan password wajib diisi.' });
-    }
-
     try {
+        const { fullName, email, password } = req.body;
+        if (!fullName || !email || !password) {
+            return res.status(400).json({ message: 'Semua kolom wajib diisi!' });
+        }
+
+        const existingUser = await User.findOne({ email });
+        if (existingUser) {
+            return res.status(400).json({ message: 'Email sudah terdaftar!' });
+        }
+
         const hashedPassword = await bcrypt.hash(password, 10);
-        const sql = `INSERT INTO users (fullName, email, password, role) VALUES (?, ?, ?, 'user')`;
-        
-        db.run(sql, [fullName, email, hashedPassword], function(err) {
-            if (err) {
-                if (err.message && err.message.includes('UNIQUE')) {
-                    return res.status(400).json({ message: 'Email sudah terdaftar.' });
-                }
-                return res.status(500).json({ message: 'Terjadi kesalahan database: ' + err.message });
-            }
-            res.status(201).json({ message: 'Registrasi berhasil! Silakan login.' });
-        });
-    } catch (error) {
-        res.status(500).json({ message: 'Terjadi kesalahan server: ' + error.message });
+        const role = email.includes('admin') ? 'admin' : 'user';
+
+        const newUser = new User({ fullName, email, password: hashedPassword, role });
+        await newUser.save();
+
+        res.status(201).json({ message: 'Registrasi berhasil!', user: { fullName, email, role } });
+    } catch (err) {
+        res.status(500).json({ message: 'Terjadi kesalahan server: ' + err.message });
     }
 });
 
 // Endpoint Login
-app.post('/api/login', (req, res) => {
-    const { email, password } = req.body;
-    if (!email || !password) {
-        return res.status(400).json({ message: 'Email dan password wajib diisi.' });
-    }
-    
-    db.get(`SELECT * FROM users WHERE email = ?`, [email], async (err, user) => {
-        if (err) return res.status(500).json({ message: 'Terjadi kesalahan database: ' + err.message });
-        if (!user) return res.status(404).json({ message: 'User tidak ditemukan.' });
-
-        try {
-            const isPasswordValid = await bcrypt.compare(password, user.password);
-            if (!isPasswordValid) return res.status(401).json({ message: 'Password salah.' });
-
-            const token = jwt.sign(
-                { id: user.id, email: user.email, role: user.role, name: user.fullName }, 
-                SECRET_KEY, 
-                { expiresIn: '7d' }
-            );
-            
-            res.json({ message: 'Login berhasil', token, role: user.role, name: user.fullName });
-        } catch (bcryptErr) {
-            res.status(500).json({ message: 'Gagal memverifikasi password.' });
+app.post('/api/login', async (req, res) => {
+    try {
+        const { email, password } = req.body;
+        if (!email || !password) {
+            return res.status(400).json({ message: 'Email dan password wajib diisi.' });
         }
-    });
+
+        const user = await User.findOne({ email });
+        if (!user) {
+            return res.status(404).json({ message: 'Email atau kata sandi salah!' });
+        }
+
+        const isPasswordValid = await bcrypt.compare(password, user.password);
+        if (!isPasswordValid) {
+            return res.status(401).json({ message: 'Email atau kata sandi salah!' });
+        }
+
+        const token = jwt.sign(
+            { id: user._id, email: user.email, role: user.role, name: user.fullName },
+            SECRET_KEY,
+            { expiresIn: '7d' }
+        );
+
+        res.json({
+            token,
+            name: user.fullName,
+            role: user.role,
+            preferred_language: user.preferredLanguage || 'id'
+        });
+    } catch (err) {
+        res.status(500).json({ message: 'Terjadi kesalahan server: ' + err.message });
+    }
 });
 
-// Middleware Validasi Token
+// Middleware Validasi Token JWT
 const authenticateToken = (req, res, next) => {
     const authHeader = req.headers['authorization'];
     const token = authHeader && authHeader.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Token tidak ditemukan.' });
+    if (!token) return res.status(401).json({ message: 'Token otorisasi tidak ditemukan.' });
 
     jwt.verify(token, SECRET_KEY, (err, user) => {
         if (err) return res.status(403).json({ message: 'Token tidak valid atau kadaluwarsa.' });
@@ -137,38 +123,52 @@ const authenticateToken = (req, res, next) => {
     });
 };
 
-// Middleware Khusus Administrator
-const requireAdmin = (req, res, next) => {
-    if (!req.user || req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Akses ditolak. Membutuhkan hak Administrator.' });
+// Endpoint Metrik Admin
+app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
+    if (req.user.role !== 'admin') {
+        return res.status(403).json({ message: 'Akses ditolak.' });
     }
-    next();
-};
 
-// Endpoint Panel Dashboard Admin
-app.get('/api/admin/metrics', authenticateToken, requireAdmin, (req, res) => {
-    db.get(`SELECT COUNT(*) as totalUsers FROM users WHERE role = 'user'`, (err, userRow) => {
-        if (err) return res.status(500).json({ message: 'Error membaca database: ' + err.message });
-        
+    try {
+        const totalUsers = await User.countDocuments();
         res.json({
-            totalUsers: userRow ? userRow.totalUsers : 0,
-            activeApps: 3,
-            status: 'Server Database Sinkron & Aman'
+            totalUsers: totalUsers,
+            totalTransactions: 840,
+            activePwas: 5,
+            serverStatus: 'Online (MongoDB Atlas)',
+            lastUpdate: new Date().toLocaleTimeString('id-ID')
         });
-    });
+    } catch (err) {
+        res.status(500).json({ message: 'Gagal memuat metrik database.' });
+    }
 });
 
-app.get('/api/profile', authenticateToken, (req, res) => {
-    db.get(`SELECT id, fullName, email, role, createdAt FROM users WHERE id = ?`, [req.user.id], (err, row) => {
-        if (err || !row) return res.status(404).json({ message: 'Data pengguna tidak ditemukan.' });
-        res.json(row);
-    });
+// Endpoint Profil Pengguna
+app.get('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const user = await User.findById(req.user.id).select('fullName email role createdAt');
+        if (!user) return res.status(404).json({ message: 'Profil tidak ditemukan.' });
+        res.json(user);
+    } catch (err) {
+        res.status(500).json({ message: 'Error server.' });
+    }
 });
 
-// Jalankan app.listen HANYA jika dijalankan di Localhost (Bukan Vercel Serverless)
-if (process.env.NODE_ENV !== 'production' && !process.env.VERCEL) {
+app.put('/api/profile', authenticateToken, async (req, res) => {
+    try {
+        const { fullName } = req.body;
+        await User.findByIdAndUpdate(req.user.id, { fullName });
+        res.json({ message: 'Profil berhasil diperbarui', name: fullName });
+    } catch (err) {
+        res.status(500).json({ message: 'Gagal memperbarui profil.' });
+    }
+});
+
+// ================= SERVER LISTENER =================
+if (require.main === module) {
+    const PORT = process.env.PORT || 3000;
     app.listen(PORT, () => {
-        console.log(`Backend API Database berjalan di http://localhost:${PORT}`);
+        console.log(`Server berjalan di http://localhost:${PORT}`);
     });
 }
 
