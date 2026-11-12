@@ -1,5 +1,5 @@
 const express = require('express');
-const connectDB = require('./db');
+const connectMongoDB = require('./db');
 const cors = require('cors');
 const bcrypt = require('bcrypt');
 const jwt = require('jsonwebtoken');
@@ -11,23 +11,13 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-// Konfigurasi Koneksi MongoDB Atlas (Ambil dari Environment Variables Vercel)
 const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://username:password@cluster.mongodb.net/app_ecosystem?retryWrites=true&w=majority';
 
-// Koneksi Database dengan Pola Caching (Optimal untuk Vercel Serverless)
-let isConnected = false;
-async function connectDB() {
-    if (isConnected) return;
-    try {
-        await mongoose.connect(MONGO_URI, {
-            useNewUrlParser: true,
-            useUnifiedTopology: true,
-        });
-        isConnected = true;
-        console.log('Terkoneksi ke MongoDB Atlas.');
-    } catch (error) {
-        console.error('Koneksi database gagal:', error);
+function ensureDbReady() {
+    if (mongoose.connection.readyState !== 1) {
+        return false;
     }
+    return true;
 }
 
 // Skema Pengguna (User Schema)
@@ -47,12 +37,20 @@ const SECRET_KEY = process.env.JWT_SECRET || 'KUNCI_RAHASIA_SUPER_AMAN_UNTUK_PWA
 
 // Middleware Koneksi DB Otomatis pada Setiap Permintaan API
 app.use(async (req, res, next) => {
-    await connectDB();
+    try {
+        await connectMongoDB();
+    } catch (error) {
+        console.error('Koneksi database gagal:', error.message);
+    }
     next();
 });
 
 // Endpoint Registrasi
 app.post('/api/register', async (req, res) => {
+    if (!ensureDbReady()) {
+        return res.status(503).json({ message: 'Database sedang tidak tersedia. Silakan coba beberapa saat lagi.' });
+    }
+
     try {
         const { fullName, email, password } = req.body;
         if (!fullName || !email || !password) {
@@ -78,6 +76,10 @@ app.post('/api/register', async (req, res) => {
 
 // Endpoint Login
 app.post('/api/login', async (req, res) => {
+    if (!ensureDbReady()) {
+        return res.status(503).json({ message: 'Database sedang tidak tersedia. Silakan coba beberapa saat lagi.' });
+    }
+
     try {
         const { email, password } = req.body;
         if (!email || !password) {
