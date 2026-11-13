@@ -1,11 +1,8 @@
 require('dotenv').config();
 
 const express = require('express');
-const connectMongoDB = require('./db');
 const cors = require('cors');
-const bcrypt = require('bcryptjs');
-const jwt = require('jsonwebtoken');
-const mongoose = require('mongoose');
+const { createClient } = require('@supabase/supabase-js');
 
 const app = express();
 
@@ -13,159 +10,219 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-const MONGO_URI = process.env.MONGO_URI || 'mongodb+srv://username:password@cluster.mongodb.net/app_ecosystem?retryWrites=true&w=majority';
-
-function ensureDbReady() {
-    if (mongoose.connection.readyState !== 1) {
-        return false;
+function getSupabaseAuthClient() {
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        throw new Error('Supabase auth is not configured.');
     }
-    return true;
+
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        auth: { autoRefreshToken: false, persistSession: false }
+    });
 }
 
-// Skema Pengguna (User Schema)
-const userSchema = new mongoose.Schema({
-    fullName: { type: String, required: true },
-    email: { type: String, required: true, unique: true },
-    password: { type: String, required: true },
-    role: { type: String, default: 'user' },
-    preferredLanguage: { type: String, default: 'id' },
-    createdAt: { type: Date, default: Date.now }
-});
-const User = mongoose.models.User || mongoose.model('User', userSchema);
+function getSupabaseUserClient(accessToken) {
+    const { SUPABASE_URL, SUPABASE_ANON_KEY } = process.env;
+    if (!SUPABASE_URL || !SUPABASE_ANON_KEY) {
+        throw new Error('Supabase auth is not configured.');
+    }
 
-const SECRET_KEY = process.env.JWT_SECRET || 'KUNCI_RAHASIA_SUPER_AMAN_UNTUK_PWA_ANDA';
+    return createClient(SUPABASE_URL, SUPABASE_ANON_KEY, {
+        global: { headers: { Authorization: `Bearer ${accessToken}` } },
+        auth: { autoRefreshToken: false, persistSession: false }
+    });
+}
 
 // ================= ROUTES API =================
 
-// Middleware Koneksi DB Otomatis pada Setiap Permintaan API
-app.use(async (req, res, next) => {
-    try {
-        await connectMongoDB();
-    } catch (error) {
-        console.error('Koneksi database gagal:', error.message);
+function handleSupabaseError(res, error) {
+    console.error('Supabase request failed:', error.message);
+    return res.status(503).json({ message: 'Layanan akun sedang tidak tersedia. Silakan coba lagi.' });
+}
+
+async function authenticateToken(req, res, next) {
+    const authHeader = req.headers.authorization || '';
+    const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
+    if (!token) {
+        return res.status(401).json({ message: 'Token otorisasi tidak ditemukan.' });
     }
-    next();
-});
+
+    try {
+        const { data: { user }, error } = await getSupabaseAuthClient().auth.getUser(token);
+        if (error || !user) {
+            return res.status(401).json({ message: 'Sesi tidak valid atau sudah berakhir.' });
+        }
+
+        req.user = user;
+        req.accessToken = token;
+        next();
+    } catch (error) {
+        return handleSupabaseError(res, error);
+    }
+}
 
 // Endpoint Registrasi
 app.post('/api/register', async (req, res) => {
-    if (!ensureDbReady()) {
-        return res.status(503).json({ message: 'Database sedang tidak tersedia. Silakan coba beberapa saat lagi.' });
-    }
-
     try {
         const { fullName, email, password } = req.body;
         if (!fullName || !email || !password) {
             return res.status(400).json({ message: 'Semua kolom wajib diisi!' });
         }
-
-        const existingUser = await User.findOne({ email });
-        if (existingUser) {
-            return res.status(400).json({ message: 'Email sudah terdaftar!' });
+        if (typeof fullName !== 'string' || typeof email !== 'string' || typeof password !== 'string'
+            || fullName.trim().length === 0 || password.length < 6) {
+            return res.status(400).json({ message: 'Nama wajib diisi dan kata sandi minimal 6 karakter.' });
         }
 
-        const hashedPassword = await bcrypt.hash(password, 10);
-        const role = email.includes('admin') ? 'admin' : 'user';
+        const { data, error } = await getSupabaseAuthClient().auth.signUp({
+            email: email.trim().toLowerCase(),
+            password,
+            options: { data: { full_name: fullName.trim() } }
+        });
+        if (error) {
+            const status = error.status === 400 || error.status === 422 ? 400 : 503;
+            return res.status(status).json({ message: status === 400 ? error.message : 'Registrasi gagal. Silakan coba lagi.' });
+        }
 
-        const newUser = new User({ fullName, email, password: hashedPassword, role });
-        await newUser.save();
-
-        res.status(201).json({ message: 'Registrasi berhasil!', user: { fullName, email, role } });
-    } catch (err) {
-        res.status(500).json({ message: 'Terjadi kesalahan server: ' + err.message });
+        return res.status(201).json({
+            message: data.session
+                ? 'Registrasi berhasil! Silakan login.'
+                : 'Registrasi berhasil. Periksa email Anda untuk mengonfirmasi akun.',
+            requiresEmailConfirmation: !data.session
+        });
+    } catch (error) {
+        return handleSupabaseError(res, error);
     }
 });
 
 // Endpoint Login
 app.post('/api/login', async (req, res) => {
-    if (!ensureDbReady()) {
-        return res.status(503).json({ message: 'Database sedang tidak tersedia. Silakan coba beberapa saat lagi.' });
-    }
-
     try {
         const { email, password } = req.body;
         if (!email || !password) {
             return res.status(400).json({ message: 'Email dan password wajib diisi.' });
         }
 
-        const user = await User.findOne({ email });
-        if (!user) {
-            return res.status(404).json({ message: 'Email atau kata sandi salah!' });
-        }
-
-        const isPasswordValid = await bcrypt.compare(password, user.password);
-        if (!isPasswordValid) {
-            return res.status(401).json({ message: 'Email atau kata sandi salah!' });
-        }
-
-        const token = jwt.sign(
-            { id: user._id, email: user.email, role: user.role, name: user.fullName },
-            SECRET_KEY,
-            { expiresIn: '7d' }
-        );
-
-        res.json({
-            token,
-            name: user.fullName,
-            role: user.role,
-            preferred_language: user.preferredLanguage || 'id'
+        const { data, error } = await getSupabaseAuthClient().auth.signInWithPassword({
+            email: email.trim().toLowerCase(),
+            password
         });
-    } catch (err) {
-        res.status(500).json({ message: 'Terjadi kesalahan server: ' + err.message });
+        if (error) {
+            const status = error.code === 'email_not_confirmed' ? 403 : 401;
+            const message = status === 403
+                ? 'Email belum dikonfirmasi. Silakan periksa kotak masuk Anda.'
+                : 'Email atau kata sandi salah.';
+            return res.status(status).json({ message });
+        }
+
+        const userClient = getSupabaseUserClient(data.session.access_token);
+        const { data: profile, error: profileError } = await userClient
+            .from('profiles')
+            .select('full_name, role')
+            .eq('id', data.user.id)
+            .maybeSingle();
+
+        if (profileError) {
+            return handleSupabaseError(res, profileError);
+        }
+
+        return res.json({
+            token: data.session.access_token,
+            refreshToken: data.session.refresh_token,
+            expiresAt: data.session.expires_at,
+            name: profile?.full_name || data.user.user_metadata?.full_name || data.user.email,
+            role: profile?.role || 'user'
+        });
+    } catch (error) {
+        return handleSupabaseError(res, error);
     }
 });
 
-// Middleware Validasi Token JWT
-const authenticateToken = (req, res, next) => {
-    const authHeader = req.headers['authorization'];
-    const token = authHeader && authHeader.split(' ')[1];
-    if (!token) return res.status(401).json({ message: 'Token otorisasi tidak ditemukan.' });
-
-    jwt.verify(token, SECRET_KEY, (err, user) => {
-        if (err) return res.status(403).json({ message: 'Token tidak valid atau kadaluwarsa.' });
-        req.user = user;
-        next();
-    });
-};
-
-// Endpoint Metrik Admin
-app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
-    if (req.user.role !== 'admin') {
-        return res.status(403).json({ message: 'Akses ditolak.' });
+app.post('/api/auth/refresh', async (req, res) => {
+    const { refreshToken } = req.body;
+    if (!refreshToken) {
+        return res.status(400).json({ message: 'Refresh token wajib diisi.' });
     }
 
     try {
-        const totalUsers = await User.countDocuments();
-        res.json({
-            totalUsers: totalUsers,
+        const { data, error } = await getSupabaseAuthClient().auth.refreshSession({
+            refresh_token: refreshToken
+        });
+        if (error || !data.session) {
+            return res.status(401).json({ message: 'Sesi tidak valid atau sudah berakhir. Silakan login kembali.' });
+        }
+
+        return res.json({
+            token: data.session.access_token,
+            refreshToken: data.session.refresh_token,
+            expiresAt: data.session.expires_at
+        });
+    } catch (error) {
+        return handleSupabaseError(res, error);
+    }
+});
+
+// Endpoint Metrik Admin
+app.get('/api/admin/metrics', authenticateToken, async (req, res) => {
+    try {
+        const userClient = getSupabaseUserClient(req.accessToken);
+        const { data: profile, error: profileError } = await userClient
+            .from('profiles')
+            .select('role')
+            .eq('id', req.user.id)
+            .single();
+        if (profileError) return handleSupabaseError(res, profileError);
+        if (profile.role !== 'admin') return res.status(403).json({ message: 'Akses ditolak.' });
+
+        const { data: totalUsers, error } = await userClient.rpc('get_landing_admin_user_count');
+        if (error) return handleSupabaseError(res, error);
+
+        return res.json({
+            totalUsers: totalUsers || 0,
             totalTransactions: 840,
             activePwas: 5,
-            serverStatus: 'Online (MongoDB Atlas)',
+            serverStatus: 'Online (Supabase)',
             lastUpdate: new Date().toLocaleTimeString('id-ID')
         });
-    } catch (err) {
-        res.status(500).json({ message: 'Gagal memuat metrik database.' });
+    } catch (error) {
+        return handleSupabaseError(res, error);
     }
 });
 
 // Endpoint Profil Pengguna
 app.get('/api/profile', authenticateToken, async (req, res) => {
     try {
-        const user = await User.findById(req.user.id).select('fullName email role createdAt');
-        if (!user) return res.status(404).json({ message: 'Profil tidak ditemukan.' });
-        res.json(user);
-    } catch (err) {
-        res.status(500).json({ message: 'Error server.' });
+        const { data: profile, error } = await getSupabaseUserClient(req.accessToken)
+            .from('profiles')
+            .select('full_name, role')
+            .eq('id', req.user.id)
+            .maybeSingle();
+        if (error) return handleSupabaseError(res, error);
+        if (!profile) return res.status(404).json({ message: 'Profil tidak ditemukan.' });
+        return res.json({
+            fullName: profile.full_name,
+            email: req.user.email,
+            role: profile.role
+        });
+    } catch (error) {
+        return handleSupabaseError(res, error);
     }
 });
 
 app.put('/api/profile', authenticateToken, async (req, res) => {
     try {
         const { fullName } = req.body;
-        await User.findByIdAndUpdate(req.user.id, { fullName });
-        res.json({ message: 'Profil berhasil diperbarui', name: fullName });
-    } catch (err) {
-        res.status(500).json({ message: 'Gagal memperbarui profil.' });
+        if (typeof fullName !== 'string' || !fullName.trim()) {
+            return res.status(400).json({ message: 'Nama wajib diisi.' });
+        }
+
+        const { error } = await getSupabaseUserClient(req.accessToken)
+            .from('profiles')
+            .update({ full_name: fullName.trim() })
+            .eq('id', req.user.id);
+        if (error) return handleSupabaseError(res, error);
+        return res.json({ message: 'Profil berhasil diperbarui', name: fullName.trim() });
+    } catch (error) {
+        return handleSupabaseError(res, error);
     }
 });
 
